@@ -1,3 +1,5 @@
+import clientPromise from '@/pages/lib/mongodb'
+import { MongoDBAdapter } from '@auth/mongodb-adapter'
 import NextAuth from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
 
@@ -12,5 +14,6 @@ export default NextAuth({
     }),
     // Passwordless / email sign in
 
-  ]
+  ],
+  adapter:MongoDBAdapter(clientPromise),
 })
