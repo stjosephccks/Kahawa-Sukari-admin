@@ -6,7 +6,7 @@ export default function AnnouncementForm({
     _id,
     title:existingTitle,
     description:existingDescription,
-    sunday: assingedSunday
+    sunday: assingedSunday    
 }){
     const[sundays, setSundays]=useState([]);
     const [title, setTittle]=useState(existingTitle||'');
