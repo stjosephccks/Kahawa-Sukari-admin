@@ -19,4 +19,14 @@ if(method==='POST'){
 
 
 }
+if(method==='PUT'){
+    const {sunday,_id}= req.body
+   const SundayDocument= await Sunday.updateOne ({_id},{
+        sunday
+        
+    })
+    res.json(SundayDocument)
+
+
+}
 }

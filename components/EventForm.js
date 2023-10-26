@@ -30,7 +30,7 @@ export default function EventForm({
             await axios.post('/api/events',data)
         }
         setgoToEvents(true)
-      
+          
 
     }
     useEffect(()=>{

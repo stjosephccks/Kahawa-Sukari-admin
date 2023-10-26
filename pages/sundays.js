@@ -1,14 +1,28 @@
 import Layout from "@/components/Layout"
 import axios from "axios"
+import { de } from "date-fns/locale";
 import { useEffect, useState } from "react"
+import { withSwal } from 'react-sweetalert2';
 
-export default function SundayPage(){
+function SundayPage({swal}){
+ const[editedSunday,setEditedSunday]=useState(null) 
  const [sunday, setSunday]= useState()
  const [sundays,setSundays]= useState([])
    async  function saveSunday(ev){
     ev.preventDefault()
-       await  axios.post('/api/sunday', {sunday})
-        setSunday('');
+    const data = {sunday}
+    if(editedSunday){
+        data._id= editedSunday._id
+
+        await axios.put('/api/sunday',data)
+        setEditedSunday(null)
+    }else{
+
+    
+       await  axios.post('/api/sunday', data)
+        
+    }
+    setSunday('');
         fetchSundays()
     }
     useEffect(()=>{
@@ -21,11 +35,21 @@ export default function SundayPage(){
        })
         
     }
+    function editSunday(sunday){
+        setEditedSunday(sunday)
+        setSunday(sunday.sunday)
+
+
+
+    }
+    function deleteSunday(sunday){
+
+    }
     return(
         <Layout>
             <h1>Sunday</h1>
               <form onSubmit={saveSunday}>
-            <label>Add New Week </label>
+            <label>{editedSunday ? `Edit Week ${editedSunday.sunday}`:'Add New Week'} </label>
             <div className="flex">
                 <input className="mb-0"
                     value={sunday}
@@ -38,6 +62,7 @@ export default function SundayPage(){
                 <thead>
                     <tr>
                         <td>Sundays</td>
+                        <td></td>
                     </tr>
                 </thead>
                 <tbody>
@@ -45,6 +70,14 @@ export default function SundayPage(){
                         <tr>
                             
                             <td>{sunday.sunday}</td>
+                            <td>
+                                <button className="btn-primary mr-1 "
+                                    onClick={()=>editSunday(sunday)}
+                                >Edit </button>
+                                <button className="btn-primary"
+                                    onClick={()=>deleteSunday(sunday)}
+                                >Delete</button>
+                            </td>
                         </tr>
                     )
 
@@ -56,3 +89,6 @@ export default function SundayPage(){
         </Layout>
     )
 }
+export default withSwal(({swal},ref)=>(
+    <SundayPage swal={swal}/>
+))
