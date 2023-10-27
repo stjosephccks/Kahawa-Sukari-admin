@@ -1,9 +1,11 @@
 import { Bulletin } from "@/models/Bulletin";
 import { mongooseConnect } from "../lib/mongoose";
+import { isAdminRequest } from "./auth/[...nextauth]";
 
 export default async function handle(req, res){
     const {method}=req;
     await mongooseConnect();
+    await isAdminRequest(req,res)
     if(method==='GET'){
         if(req.query?.id){
             res.json(await Bulletin.findOne({_id:req.query.id}))
@@ -14,7 +16,7 @@ export default async function handle(req, res){
     }
 
     if(method==='POST'){
-        const {title,content}= req.body
+        const {title,content,images}= req.body
        const BulletinDocument= await Bulletin.create({
             title,content,images
             

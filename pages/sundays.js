@@ -42,7 +42,26 @@ function SundayPage({swal}){
 
 
     }
-    function deleteSunday(sunday){
+     function deleteSunday(sunday){
+        swal.fire({
+            title: 'Are you sure ?',
+            text: `Do you want to delete ${sunday.sunday} ?`,
+            showCancelButton:true,
+            cancelButtonText:'Cancel',
+            reverseButtons:true,
+            confirmButtonColor:'#d55',
+            confirmButtonText:'yes Delete',
+          
+        }).then(async  result => {
+            if(result.isConfirmed){
+                const {_id}=sunday
+
+               await axios.delete('/api/sunday?_id='+_id)
+                fetchSundays();
+            }
+            // when confirmed and promise resolved...
+        });
+
 
     }
     return(
@@ -67,7 +86,7 @@ function SundayPage({swal}){
                 </thead>
                 <tbody>
                     {sundays.length > 0 && sundays.map(sunday=>(
-                        <tr>
+                        <tr key={sunday._id}>
                             
                             <td>{sunday.sunday}</td>
                             <td>
