@@ -4,6 +4,7 @@ import axios from "axios";
 import { convertToRaw } from "draft-js";
 import { useRouter } from "next/router.js";
 import Spinner from "./Spinner.js";
+import Image from "next/image.js";
 
 export default function RichText({
     _id,
@@ -40,7 +41,7 @@ export default function RichText({
         if(goToBulletins){
             router.push('/bulletin')
         }
-    },[goToBulletins])
+    },[goToBulletins,router ])
     const handleEditorStateChange = (editorState) => {
         const contentState = editorState.getCurrentContent();
         setContent(JSON.stringify(convertToRaw(contentState))); // Convert editorState to content
@@ -84,7 +85,9 @@ export default function RichText({
                     {!!images?.length && images.map(link => (
                         <div key={link} className='h-24  p-1 flex items-center '>
                                                      
-                         <img
+                         <Image
+                            width={100}
+                            height={150}
                             src={link}
                             alt=''
                             className="rounded-lg"
