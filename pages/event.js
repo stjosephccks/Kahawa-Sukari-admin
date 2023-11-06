@@ -14,7 +14,7 @@ export default function Events(){
     function formatDateForDisplay(date) {
         return date ? format(new Date(date), "MMMM d, yyyy - h:mm a") : '';
       }
-      
+        
     return(
         <Layout>
        

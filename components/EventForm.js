@@ -20,7 +20,7 @@ export default function EventForm({
     const [goToEvents, setgoToEvents]= useState(false)
     const [isUploading ,setIsUploading]=useState(false)
     const router =useRouter()
-    async function saveEvent(ev){
+    async function saveEvent(ev){   
         ev.preventDefault()
         const data={title,description,date,images}
         if(_id){

@@ -4,7 +4,17 @@ import NextAuth, { getServerSession } from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
 
 
-const adminEmails =['simiyuwakasiaka@gmail.com']
+let  adminEmails =['simiyuwakasiaka@gmail.com']
+
+export async function loadAdminEmailsFromDatabase() {
+  const client = await clientPromise;
+  const db = client.db();
+  const adminEmailCollection = db.collection('adminemails'); // Replace 'adminEmails' with your MongoDB collection name.
+
+  const adminEmailDocuments = await adminEmailCollection.find({}).toArray();
+  adminEmails = adminEmailDocuments.map((document) => document.email);
+}
+loadAdminEmailsFromDatabase();
 export const authOptions= {
   providers: [
     // OAuth authentication providers...
@@ -37,8 +47,8 @@ export async function isAdminRequest(req,res){
   const session =await  getServerSession(req,res,authOptions)
   
   if(!adminEmails.includes(session?.user?.email)){
-    res.status(401)
-    res.end()
+    res.status(401).end()
+    
     throw 'Not Admin'
   }
 }
