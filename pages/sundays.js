@@ -84,16 +84,16 @@ function SundayPage({swal}){
                         <td></td>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody>  
                     {sundays.length > 0 && sundays.map(sunday=>(
                         <tr key={sunday._id}>
                             
                             <td>{sunday.sunday}</td>
                             <td>
-                                <button className="btn-primary mr-1 "
+                                <button className="btn-default mr-1 "
                                     onClick={()=>editSunday(sunday)}
                                 >Edit </button>
-                                <button className="btn-primary"
+                                <button className="btn-red"  
                                     onClick={()=>deleteSunday(sunday)}
                                 >Delete</button>
                             </td>

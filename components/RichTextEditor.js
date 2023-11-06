@@ -26,9 +26,7 @@ export default function RichTextEditor({ onEditorStateChange, initialContent }){
       onEditorStateChange(editorState); // Pass the editorState to the parent component
     };
   
-   function uploadImageCallBack(){
-
-   }
+   
     return ( 
         <div className="bg-gray-100 pb-16 ">
                 <Editor
@@ -37,7 +35,7 @@ export default function RichTextEditor({ onEditorStateChange, initialContent }){
                     toolbarClassName=" text-md flex sticky-top-0 z-50  !justify-center mx-auto"
                     editorClassName='mt-6 p-10  bg-white min-h-screen shadow-lg max-w-4xl mx-auto mb-12 border'
                     toolbar={{
-                        options: ['inline', 'blockType', 'list', 'textAlign', 'link', 'image'],
+                        options: ['inline', 'blockType', 'list', 'textAlign'],
                         inline: {
                           options: ['bold', 'italic', 'underline'],
                         },
@@ -51,12 +49,8 @@ export default function RichTextEditor({ onEditorStateChange, initialContent }){
                         textAlign: {
                           options: ['left', 'center', 'right'],
                         },
-                        link: {
-                          inDropdown: true,
-                        },
-                        image: {
-                          urlEnabled: true,
-                        },
+                        
+                        
                       }}
                     />
         </div>

@@ -54,6 +54,7 @@ export default function AnnouncementForm({
           
 
             <form onSubmit={saveAnnouncement}>
+                <label>Sunday</label>
                 <select className='mb-0' value={sunday} onChange={ev=>setSunday(ev.target.value)} >
                     <option value='0'> No Sunday Selected</option>
                     {sundays.length > 0 && sundays.map(sunday=>(
