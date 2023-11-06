@@ -40,7 +40,7 @@ export default function AnnouncementForm({
         if (goToAnnouncements) {
           router.push('/announcement');
         }
-      }, [goToAnnouncements]);
+      }, [goToAnnouncements,router ]);
 
       useEffect(()=>{
         axios.get('/api/sunday').then(response=>{

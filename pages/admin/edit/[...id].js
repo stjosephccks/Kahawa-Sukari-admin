@@ -16,7 +16,7 @@ export default function EditAdmin(){
                 setAdminInfo(response.data)
             })
         
-    },[])
+    },[id])
     return(
         <Layout>
             {

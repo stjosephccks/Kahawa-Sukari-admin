@@ -17,7 +17,7 @@ useEffect(()=>{
         setBulletinInfo(response.data)
     })
 
-},[])
+},[id])
     return(
         <Layout>
             {bulletinInfo&& (

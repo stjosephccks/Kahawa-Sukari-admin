@@ -29,7 +29,7 @@ export default function AdminForm({
         if (goToAdmins) {
           router.push('/admin');
         }
-      }, [goToAdmins]);
+      }, [goToAdmins, router]);
   
     return(
         <form onSubmit={saveAdmin}>

@@ -16,7 +16,7 @@ export default function EditEvent(){
             setEventInfo(response.data)
         })
 
-    },[])
+    },[id])
 
     return(
         <Layout>

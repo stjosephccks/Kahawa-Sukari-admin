@@ -38,7 +38,7 @@ export default function EventForm({
             router.push('/event')
         }
 
-    },[goToEvents])
+    },[goToEvents, router ])
   function formatDateForInput(date) {
   return date ? format(new Date(date), "yyyy-MM-dd'T'HH:mm") : '';
 }

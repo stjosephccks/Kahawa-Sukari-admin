@@ -17,7 +17,7 @@ export default function EditAnnouncement(){
             
 
         })
-    },[])
+    },[id])
     return(
     <Layout>
         {announcementInfo &&(
