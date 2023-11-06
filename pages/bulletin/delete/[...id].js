@@ -29,7 +29,7 @@ export default function DeleteBulletin(){
     }
     return(
         <Layout>
-            <h1 className='text-center'>Do you really want to delete Bulletin &nbsp;"{bulletinInfo?.title}"?</h1>
+            <h1 className='text-center'>Do you really want to delete Bulletin &nbsp;'{bulletinInfo?.title}'?</h1>
             <div className='flex gap-2 justify-center'>
                 <button
                 onClick={deleteBulletin} className='btn-red'>Yes</button>

@@ -26,7 +26,7 @@ export default function DeleteAdmin(){
     }
     return(
         <Layout>
-            <h1 className='text-center'>Do you really want to delete User &nbsp;"{adminInfo?.name}"?</h1>
+            <h1 className='text-center'>Do you really want to delete User &nbsp;'{adminInfo?.name}'?</h1>
             <div className='flex gap-2 justify-center'>
                 <button
                 onClick={deleteAdmin} className='btn-red'>Yes</button>

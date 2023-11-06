@@ -25,7 +25,7 @@ export default function DeleteEvent(){
     }
     return(
         <Layout>
-            <h1 className='text-center'>Do you really want to delete Announcement &nbsp;"{eventInfo?.title}"?</h1>
+            <h1 className='text-center'>Do you really want to delete Announcement &nbsp;'{eventInfo?.title}'?</h1>
             <div className='flex gap-2 justify-center'>
                 <button
                 onClick={deleteEvent} className='btn-red'>Yes</button>

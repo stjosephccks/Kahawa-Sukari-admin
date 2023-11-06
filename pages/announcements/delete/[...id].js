@@ -1,7 +1,9 @@
-import Layout from "@/components/Layout";
-import axios from "axios";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import axios from "axios";
+import Layout from "@/components/Layout";
+
+
 
 export default function deleteAnnouncementPage(){
     const[announcementInfo, setannouncementInfo]=useState()
@@ -25,7 +27,7 @@ export default function deleteAnnouncementPage(){
     }
     return(
         <Layout>
-            <h1 className='text-center'>Do you really want to delete Announcement &nbsp;"{announcementInfo?.title}"?</h1>
+            <h1 className='text-center'>Do you really want to delete Announcement &nbsp;'{announcementInfo?.title}'?</h1>
             <div className='flex gap-2 justify-center'>
                 <button
                 onClick={deleteAnnouncement} className='btn-red'>Yes</button>
