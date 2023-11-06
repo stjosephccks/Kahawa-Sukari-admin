@@ -19,14 +19,14 @@ export default function DeleteAdmin(){
     },[id])
     async function deleteAdmin(){
        await axios.delete('/api/admin?id='+id);
-       goBack()
+       goBack() 
     }
     function goBack(){
         router.push('/admin')
     }
     return(
         <Layout>
-            <h1 className='text-center'>{`Do you really want to delete Announcement '${announcementInfo?.title}'?`}</h1>
+            <h1 className='text-center'>{`Do you really want to delete Announcement &nbsp; &lsquo;'${adminInfo?.name}&rsquo;?`}</h1>
             <div className='flex gap-2 justify-center'>
                 <button
                 onClick={deleteAdmin} className='btn-red'>Yes</button>
