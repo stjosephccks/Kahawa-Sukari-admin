@@ -75,7 +75,7 @@ function updateImagesOrder(images){
                 <label>Event Title</label>
                 <input value={title} onChange={ev=>setTitle(ev.target.value)} type="text" placeholder='title'/>
                 <label>Event description</label>
-                <textarea value={description} onChange={ev=>setDescription(ev.target.value)} placeholder="event description"></textarea>
+                <textarea rows={15} value={description} onChange={ev=>setDescription(ev.target.value)} placeholder="event description"></textarea>
                
                 <label>Photos</label>
                 <div className="mb-2 flex flex-wrap gap-1">

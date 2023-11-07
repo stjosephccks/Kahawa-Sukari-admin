@@ -65,7 +65,7 @@ export default function AnnouncementForm({
                 <input
                     value={title} onChange={ev=>setTittle(ev.target.value)}type='text' placeholder="Title"/>
                 <label>Description</label>
-                <textarea   placeholder="Description" value={description} onChange={ev=>setDescription(ev.target.value)}></textarea>
+                <textarea   placeholder="Description" value={description} onChange={ev=>setDescription(ev.target.value)} rows={15}></textarea>
                 <button type="submit" className="btn-primary">Save</button>
             </form>
             </>
