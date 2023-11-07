@@ -52,7 +52,11 @@ export default function Home() {
         {announcements.map(announcement=>(
           <tr key={announcement._id}>
             <td>{announcement.title}</td>
-            <td>{announcement.description}</td>
+            <td className="truncate" style={{ maxWidth: '200px' }}>
+                {announcement.description.length > 200
+                  ? announcement.description.slice(0, 200) + '...'
+                : announcement.description}
+            </td>
   
           </tr>
         ))}

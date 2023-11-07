@@ -52,7 +52,11 @@ const[heading,setHeading]=useState([])
                         <tr key={announcement._id}>
                             
                             <td>{announcement.title}</td>
-                            <td>{announcement.description}</td>
+                            <td className="truncate" style={{ maxWidth: '200px' }}>
+                                    {announcement.description.length > 200
+                                    ? announcement.description.slice(0, 200) + '...'
+                                    : announcement.description}
+                            </td>
                             <td>
                                 <Link className="btn-default" href={'/announcements/edit/'+announcement._id}>
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">

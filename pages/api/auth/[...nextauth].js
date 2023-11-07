@@ -13,7 +13,7 @@ export async function loadAdminEmailsFromDatabase() {
 
   const adminEmailDocuments = await adminEmailCollection.find({}).toArray();
   adminEmails = adminEmailDocuments.map((document) => document.email);
-  console.log(adminEmails)
+
 }
 loadAdminEmailsFromDatabase();
 export const authOptions= {
