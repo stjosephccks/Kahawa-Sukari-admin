@@ -16,6 +16,7 @@ export async function loadAdminEmailsFromDatabase() {
 }
 loadAdminEmailsFromDatabase();
 export const authOptions= {
+  secret: process.env.AUTH_SECRET,
   providers: [
     // OAuth authentication providers...
  
