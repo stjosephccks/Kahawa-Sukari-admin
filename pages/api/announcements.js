@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth";
 import { Announcement } from "../../models/Announcements";
-import { mongooseConnect } from "../lib/mongoose";
+import { mongooseConnect } from "../../lib/mongoose";
 import { authOptions, isAdminRequest } from "./auth/[...nextauth]";
 
 export default async function handle(req, res){

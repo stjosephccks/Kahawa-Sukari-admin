@@ -1,5 +1,5 @@
 import { Event } from "@/models/Event";
-import { mongooseConnect } from "../lib/mongoose";
+import { mongooseConnect } from "../../lib/mongoose";
 import { isAdminRequest } from "./auth/[...nextauth]";
 
 export default async function handle(req, res){

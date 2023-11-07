@@ -1,4 +1,4 @@
-import { mongooseConnect } from "../lib/mongoose";
+import { mongooseConnect } from "../../lib/mongoose";
 import { Sunday } from "@/models/Sunday";
 import { isAdminRequest } from "./auth/[...nextauth]";
 

@@ -1,5 +1,5 @@
 import { AdminEmail } from "@/models/Admin"
-import { mongooseConnect } from "../lib/mongoose"
+import { mongooseConnect } from "../../lib/mongoose"
 
 export default async function handle(req,res){
     const{method}=req
