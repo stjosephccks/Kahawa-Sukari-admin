@@ -27,7 +27,7 @@ export default function DeleteAnnouncementPage(){
     }
     return(
         <Layout>
-            <h1 className='text-center'>{`Do you really want to delete Announcement &nbsp;&lsquo;${announcementInfo?.title}&rsquo;?`}</h1>
+            <h1 className='text-center'> Do you really want to delete Announcement &nbsp;&lsquo;{announcementInfo?.title}&rsquo;?</h1>
             <div className='flex gap-2 justify-center'>
                 <button
                 onClick={deleteAnnouncement} className='btn-red'>Yes</button>
