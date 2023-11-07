@@ -4,7 +4,7 @@ import NextAuth, { getServerSession } from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
 
 
-let  adminEmails =['simiyuwakasiaka@gmail.com']
+let  adminEmails =[]
 
 export async function loadAdminEmailsFromDatabase() {
   const client = await clientPromise;
@@ -13,6 +13,7 @@ export async function loadAdminEmailsFromDatabase() {
 
   const adminEmailDocuments = await adminEmailCollection.find({}).toArray();
   adminEmails = adminEmailDocuments.map((document) => document.email);
+  console.log(adminEmails)
 }
 loadAdminEmailsFromDatabase();
 export const authOptions= {

@@ -1,10 +1,30 @@
 import Layout from "@/components/Layout";
+import axios from "axios";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
+import { useEffect, useState } from "react";
+import { format } from 'date-fns';
+
 
 
 export default function Home() {
   const {data: session}=useSession()
+  const [announcements, setAnnouncements]= useState([])
+  const [events, setEvents]= useState([])  
+  useEffect(()=>{
+    axios.get('/api/announcements').then(response =>{
+      setAnnouncements(response.data)
+    })
+    axios.get('/api/events').then(response=>{
+      setEvents(response.data)
+
+    })
+   
+  },[])
+  function formatDateForDisplay(date) {
+    return date ? format(new Date(date), "MMMM d, yyyy - h:mm a") : '';
+  }
+
   
 
 
@@ -16,8 +36,44 @@ export default function Home() {
         <span className="px-2 ">
         {session?.user?.name}
         </span>
-      </div>
+      </div>   
     </div>
+   
+    <table className="basic mt-1">
+      <thead>
+        <tr>
+          <td>Accouncements</td>
+          <td></td>
+          <td></td>
+          
+        </tr>
+      </thead>
+      <tbody>
+        {announcements.map(announcement=>(
+          <tr key={announcement._id}>
+            <td>{announcement.title}</td>
+            <td>{announcement.description}</td>
+  
+          </tr>
+        ))}
+      </tbody>
+      <thead>
+        <tr>
+          <td>Events</td>
+          <td></td>
+          <td></td>
+        </tr>
+      </thead>
+      <tbody>
+        {events.map(event=>(
+          <tr key={event._id}>
+            <td>{event.title}</td>
+            <td>{event.description}</td>
+            <td>{formatDateForDisplay(event.date)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   </Layout>
  
 }

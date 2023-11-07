@@ -76,7 +76,7 @@ function updateImagesOrder(images){
                 <input value={title} onChange={ev=>setTitle(ev.target.value)} type="text" placeholder='title'/>
                 <label>Event description</label>
                 <textarea value={description} onChange={ev=>setDescription(ev.target.value)} placeholder="event description"></textarea>
-                <label>Date of Event</label>
+               
                 <label>Photos</label>
                 <div className="mb-2 flex flex-wrap gap-1">
                     <ReactSortable
@@ -116,6 +116,7 @@ function updateImagesOrder(images){
                  
 
                 </div>
+                <label>Date of Event</label>
                 <input value={formatDateForInput(date)} onChange={ev=>setDate(ev.target.value)} type="datetime-local"></input>
                 <button className="btn-primary" type="submit"> Save</button>
 
