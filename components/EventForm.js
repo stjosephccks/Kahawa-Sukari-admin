@@ -52,9 +52,11 @@ async function uploadImages(ev){
 
         }
        const res = await axios.post('/api/upload',data)
-       setImages(oldImages => {
-        return [...oldImages, ...res.data.links]
-       });
+       const newImages = res.data.links 
+           setImages(oldImages => 
+             [...oldImages, ...newImages]
+           );
+           setLoadedImages(oldLoadedImages => [...oldLoadedImages, ...Array(newImages.length).fill(false)]);
        setIsUploading(false)
         
         //console.log(res.data)

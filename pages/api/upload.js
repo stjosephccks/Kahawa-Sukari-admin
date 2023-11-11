@@ -34,15 +34,22 @@ export default async function handle(req, res ){
       const acl = 'public-read';
       
       //console.log({ext,file})
-      client.send(new PutObjectCommand({
-         Bucket: bucketName,
-         Key: newFilename,
-         Body: fs.readFileSync(file.path),
-         ACL: acl,
-         ContentType: contentType
-      }));
-      const link =`https://${bucketName}.s3.amazonaws.com/${newFilename}`; 
-      links.push(link);
+      try {
+        const data= await  client.send(new PutObjectCommand({
+            Bucket: bucketName,
+            Key: newFilename,
+            Body: fs.readFileSync(file.path),
+            ACL: acl,
+            ContentType: contentType
+         }));
+         const link =`https://${bucketName}.s3.amazonaws.com/${newFilename}`; 
+         links.push(link);
+         
+      } catch (error) {
+         console.error("Error uploading file:", error);
+         
+      }
+      
    }
    return res.json({links});
 }

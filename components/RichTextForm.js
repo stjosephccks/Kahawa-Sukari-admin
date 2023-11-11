@@ -18,6 +18,7 @@ export default function RichText({
     const [goToBulletins, setgoToBulletins]= useState(false)
     const [isUploading ,setIsUploading]=useState(false)
     const [images,setImages]=useState(existingImages||[])
+    const [loadedImages, setLoadedImages] = useState(Array(images.length).fill(false));
 
 
     async function saveBulletin(ev){
@@ -57,20 +58,17 @@ export default function RichText({
     
             }
            const res = await axios.post('/api/upload',data)
-           setImages(oldImages => {
-            return [...oldImages, ...res.data.links]
-           });
+           const newImages = res.data.links 
+           setImages(oldImages => 
+             [...oldImages, ...newImages]
+           );
+           setLoadedImages(oldLoadedImages => [...oldLoadedImages, ...Array(newImages.length).fill(false)]);
            setIsUploading(false)
             
             //console.log(res.data)
         }
     }
-    function updateImagesOrder(images){
-        setImages(images)
-    
-    
-    
-    }
+  
     
     return (
         <form onSubmit={saveBulletin} >

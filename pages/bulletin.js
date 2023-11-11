@@ -9,7 +9,7 @@ export default function Bulletin(){
         axios.get('/api/bulletin').then(response=>{
             setBulletins(response.data)
         })
-    })
+    },[])
     return(
         <Layout>
             <Link className="btn-primary" href={'/bulletin/new'}>Add New Bulletin</Link>
