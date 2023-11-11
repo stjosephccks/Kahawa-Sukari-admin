@@ -38,7 +38,7 @@ export default async function handle(req, res ){
         const data= await  client.send(new PutObjectCommand({
             Bucket: bucketName,
             Key: newFilename,
-            Body: fs.readFileSync(file.path),
+            Body: fs.createReadStream(file.path),
             ACL: acl,
             ContentType: contentType
          }));

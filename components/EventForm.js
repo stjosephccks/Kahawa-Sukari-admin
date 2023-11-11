@@ -19,6 +19,8 @@ export default function EventForm({
     const [images,setImages]=useState(existingImages||[])
     const [goToEvents, setgoToEvents]= useState(false)
     const [isUploading ,setIsUploading]=useState(false)
+    const [loadedImages, setLoadedImages] = useState(Array(images.length).fill(false));
+
     const router =useRouter()
     async function saveEvent(ev){   
         ev.preventDefault()
