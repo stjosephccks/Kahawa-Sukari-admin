@@ -81,7 +81,7 @@ export default function RichText({
          
                    
                     {!!images?.length && images.map(link => (
-                        <div key={link} className='h-24  p-1 flex items-center '>
+                        <div key={link} className='h-24  bg-white p-4  shadow-sm rounded-sm border border-gray-200  '>
                                                      
                          <Image
                             width={100}
@@ -101,7 +101,7 @@ export default function RichText({
                         </div>  
                     )}
                    
-                    <label className='  cursor-pointer w-24 h-24 text-center flex items-center justify-center text-sm gap-1 text-gray-500 rounded-lg bg-gray-200'>
+                    <label className='cursor-pointer w-24 h-24 text-center flex flex-col items-center justify-center text-sm gap-1 text-primary rounded-sm bg-white shadow-sm border border-primary'>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15m0-3l-3-3m0 0l-3 3m3-3V15" />
                     </svg>
@@ -120,7 +120,7 @@ export default function RichText({
           
        
 
-            <button className="btn-primary pt-1" type="submit">Save</button>
+            <button className="btn-primary py-2 " type="submit">Save</button>
              
             
         </form>
