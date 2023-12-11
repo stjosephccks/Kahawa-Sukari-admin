@@ -16,9 +16,9 @@ export default async function handle(req, res){
     }
 
     if(method==='POST'){
-        const {title,content,images}= req.body
+        const {title,content,images,description}= req.body
        const BulletinDocument= await Bulletin.create({
-            title,content,images
+            title,content,description,images
             
         })
         res.json(BulletinDocument)
@@ -26,8 +26,8 @@ export default async function handle(req, res){
 
     }
     if (method ==='PUT'){
-        const {title,content,images, _id}= req.body
-        await Bulletin.updateOne({_id},{ title,content,images})
+        const {title,content,description, images, _id}= req.body
+        await Bulletin.updateOne({_id},{ title,content,description,images})
         res.json(true)
 
 

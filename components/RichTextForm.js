@@ -10,7 +10,9 @@ export default function RichText({
     _id,
     title:existingTitle,
     images:existingImages,
+    description:existingDescription,
     content:existingContent
+
 
 }){
     const [content, setContent]=useState(existingContent||'')
@@ -18,12 +20,13 @@ export default function RichText({
     const [goToBulletins, setgoToBulletins]= useState(false)
     const [isUploading ,setIsUploading]=useState(false)
     const [images,setImages]=useState(existingImages||[])
+    const [description,setDescription]=useState(existingDescription||'')
     const [loadedImages, setLoadedImages] = useState(Array(images.length).fill(false));
 
 
     async function saveBulletin(ev){
         ev.preventDefault()
-        const data={title,content,images}
+        const data={title,content,description, images}
         if(_id){
             await axios.put('/api/bulletin',{...data,_id})
         }
@@ -74,6 +77,8 @@ export default function RichText({
         <form onSubmit={saveBulletin} >
             <label>Title</label>
             <input value={title} onChange={ev=>setTitle(ev.target.value)} type="text" placeholder="title"/>
+            <label>Description</label>
+            <textarea   placeholder="Description" value={description} onChange={ev=>setDescription(ev.target.value)} rows={5}></textarea>
             <label>Cover Photo</label>
 
           
