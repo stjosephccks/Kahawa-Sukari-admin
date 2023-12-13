@@ -11,6 +11,7 @@ export default function EventForm({
     title:existingTitle,
     description:existingDescription,
     date:existingDate,
+    venue:existingVenue,
     images:existingImages
 }){
     const [title,setTitle]=useState(existingTitle||'')
@@ -19,12 +20,13 @@ export default function EventForm({
     const [images,setImages]=useState(existingImages||[])
     const [goToEvents, setgoToEvents]= useState(false)
     const [isUploading ,setIsUploading]=useState(false)
+    const [venue,setVenue]= useState(existingVenue||'')
     const [loadedImages, setLoadedImages] = useState(Array(images.length).fill(false));
 
     const router =useRouter()
     async function saveEvent(ev){   
         ev.preventDefault()
-        const data={title,description,date,images}
+        const data={title,description,date,venue, images}
         if(_id){
            await axios.put('/api/events', {...data,_id})
         }
@@ -120,6 +122,8 @@ function updateImagesOrder(images){
                  
 
                 </div>
+                <label>Venue</label>
+                <input type="text" value={venue} onChange={ev=>setVenue(ev.target.value)}/>
                 <label>Date of Event</label>
                 <input value={formatDateForInput(date)} onChange={ev=>setDate(ev.target.value)} type="datetime-local"></input>
                 <button className="btn-primary" type="submit"> Save</button>

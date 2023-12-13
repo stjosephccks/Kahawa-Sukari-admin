@@ -18,9 +18,9 @@ export default async function handle(req, res){
 
 
     if(method==='POST'){
-        const {title,description,date,images}= req.body
+        const {title,description,date,venue,images}= req.body
        const EventDocument= await Event.create({
-            title,description,date,images
+            title,description,date,venue,images
             
         })
         res.json(EventDocument)
@@ -28,8 +28,8 @@ export default async function handle(req, res){
 
     }
     if(method==='PUT'){
-        const {title, description,date,images,_id}=req.body
-       await  Event.updateOne({_id},{title,description,date,images})
+        const {title, description,date,venue, images,_id}=req.body
+       await  Event.updateOne({_id},{title,description,date,venue,images})
         res.json(true);
     }
     if(method==='DELETE'){
