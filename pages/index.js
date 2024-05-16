@@ -8,10 +8,11 @@ import { format } from 'date-fns';
 
 
 export default function Home() {
-  const {data: session}=useSession()
+  const {data: session, status}=useSession()
   const [announcements, setAnnouncements]= useState([])
   const [events, setEvents]= useState([])  
   useEffect(()=>{
+    if(status === 'authenticated' ){
     axios.get('/api/announcements').then(response =>{
       setAnnouncements(response.data)
     })
@@ -20,7 +21,8 @@ export default function Home() {
 
     })
    
-  },[])
+  }
+},[status])
   function formatDateForDisplay(date) {
     return date ? format(new Date(date), "MMMM d, yyyy - h:mm a") : '';
   }
