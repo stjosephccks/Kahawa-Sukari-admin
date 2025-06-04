@@ -19,7 +19,6 @@ export default function AnnouncementDoc() {
   });
   const fileInputRef = useRef(null);
 
-
   useEffect(() => {
     fetchDocuments();
   }, []);
@@ -146,116 +145,112 @@ export default function AnnouncementDoc() {
     }
   };
 
+  const currentDoc = selectedDocument || documents[0];
+
   return (
     <Layout>
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6 p-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Church Document Management</h1>
-          <p className="text-gray-600">Upload, parse, and manage church announcements and schedules</p>
-        </div>
-
-        {/* Navigation Tabs */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-          <div className="border-b border-gray-200">
-            <nav className="flex space-x-8 px-6">
-              {[
-                { id: 'upload', label: 'Upload Documents', icon: Upload },
-                { id: 'view', label: 'View Parsed Data', icon: FileText },
-                { id: 'schedule', label: 'Mass Schedule', icon: Calendar },
-                { id: 'announcements', label: 'Announcements', icon: Bell }
-              ].map(({ id, label, icon: Icon }) => (
-                <button
-                  key={id}
-                  onClick={() => setActiveTab(id)}
-                  className={`py-4 px-2 border-b-2 font-medium text-sm flex items-center space-x-2 ${
-                    activeTab === id
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  <span>{label}</span>
-                </button>
-              ))}
-            </nav>
+      <div className="min-h-screen bg-gray-50 p-4">
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6 p-6">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Church Document Management</h1>
+            <p className="text-gray-600">Upload, parse, and manage church announcements and schedules</p>
           </div>
 
-          <div className="p-6">
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-                {error}
-                <button
-                  onClick={() => setError(null)}
-                  className="float-right text-red-700 hover:text-red-900"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            )}
-
-            {loading && (
-              <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg mb-6">
-                Processing... Please wait
-              </div>
-            )}
-
-            {activeTab === 'upload' && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-center w-full">
-                  <label 
-                    htmlFor="dropzone-file" 
-                    className={`flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${loading || uploadedFiles.length > 0 ? 'border-gray-200 bg-gray-50' : 'border-gray-300 bg-gray-50 hover:bg-gray-100'}`}
+          {/* Navigation Tabs */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+            <div className="border-b border-gray-200">
+              <nav className="flex space-x-8 px-6">
+                {[
+                  { id: 'upload', label: 'Upload Documents', icon: Upload },
+                  { id: 'view', label: 'View Parsed Data', icon: FileText },
+                  { id: 'schedule', label: 'Mass Schedule', icon: Calendar },
+                  { id: 'announcements', label: 'Announcements', icon: Bell }
+                ].map(({ id, label, icon: Icon }) => (
+                  <button
+                    key={id}
+                    onClick={() => setActiveTab(id)}
+                    className={`py-4 px-2 border-b-2 font-medium text-sm flex items-center space-x-2 ${activeTab === id
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }`}
                   >
-                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                      <Upload className={`w-10 h-10 mb-3 ${loading || uploadedFiles.length > 0 ? 'text-gray-300' : 'text-gray-400'}`} />
-                      <p className="mb-2 text-sm text-gray-500">
-                        <span className="font-semibold">Click to upload</span> or drag and drop
-                      </p>
-                      <p className="text-xs text-gray-500">Word document (.docx)</p>
-                      {loading && (
-                        <div className="mt-4 text-blue-600">
-                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
-                          <p className="text-sm">Processing document...</p>
-                        </div>
-                      )}
-                    </div>
-                    <input
-                      ref={fileInputRef}
-                      id="dropzone-file"
-                      type="file"
-                      className="hidden"
-                      accept=".docx"
-                      onChange={handleFileUpload}
-                      disabled={loading || uploadedFiles.length > 0}
-                    />
-                  </label>
+                    <Icon className="w-4 h-4" />
+                    <span>{label}</span>
+                  </button>
+                ))}
+              </nav>
+            </div>
+
+            <div className="p-6">
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+                  {error}
+                  <button
+                    onClick={() => setError(null)}
+                    className="float-right text-red-700 hover:text-red-900"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
                 </div>
+              )}
 
-                {/* Upload Status */}
-                {uploadedFiles.length > 0 && (
-                  <div className="mt-4">
-                    {uploadedFiles.map((file, index) => (
-                      <div key={index} className={`p-4 rounded-lg ${file.status === 'error' ? 'bg-red-50' : file.status === 'completed' ? 'bg-green-50' : 'bg-blue-50'}`}>
-                        <div className="flex items-center">
-                          <FileText className="w-5 h-5 mr-2 text-gray-500" />
-                          <span className="flex-1 text-sm text-gray-900">{file.name}</span>
-                          <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${file.status === 'error' ? 'bg-red-100 text-red-800' : file.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}>
-                            {file.status}
-                          </span>
-                        </div>
+              {loading && (
+                <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg mb-6">
+                  Processing... Please wait
+                </div>
+              )}
+
+              {activeTab === 'upload' && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-center w-full">
+                    <label
+                      htmlFor="dropzone-file"
+                      className={`flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${loading || uploadedFiles.length > 0 ? 'border-gray-200 bg-gray-50' : 'border-gray-300 bg-gray-50 hover:bg-gray-100'}`}
+                    >
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <Upload className={`w-10 h-10 mb-3 ${loading || uploadedFiles.length > 0 ? 'text-gray-300' : 'text-gray-400'}`} />
+                        <p className="mb-2 text-sm text-gray-500">
+                          <span className="font-semibold">Click to upload</span> or drag and drop
+                        </p>
+                        <p className="text-xs text-gray-500">Word document (.docx)</p>
+                        {loading && (
+                          <div className="mt-4 text-blue-600">
+                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                            <p className="text-sm">Processing document...</p>
+                          </div>
+                        )}
                       </div>
-                    ))}
+                      <input
+                        ref={fileInputRef}
+                        id="dropzone-file"
+                        type="file"
+                        className="hidden"
+                        accept=".docx"
+                        onChange={handleFileUpload}
+                        disabled={loading || uploadedFiles.length > 0}
+                      />
+                    </label>
                   </div>
-                )}
 
-                {/* Error Message */}
-                {error && (
-                  <div className="p-4 bg-red-50 rounded-lg">
-                    <p className="text-sm text-red-800">{error}</p>
-                  </div>
-                )}
+                  {/* Upload Status */}
+                  {uploadedFiles.length > 0 && (
+                    <div className="mt-4">
+                      {uploadedFiles.map((file, index) => (
+                        <div key={index} className={`p-4 rounded-lg ${file.status === 'error' ? 'bg-red-50' : file.status === 'completed' ? 'bg-green-50' : 'bg-blue-50'}`}>
+                          <div className="flex items-center">
+                            <FileText className="w-5 h-5 mr-2 text-gray-500" />
+                            <span className="flex-1 text-sm text-gray-900">{file.name}</span>
+                            <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${file.status === 'error' ? 'bg-red-100 text-red-800' : file.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}>
+                              {file.status}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Uploaded Files List */}
                   <div>
                     <h3 className="text-lg font-medium text-gray-900 mb-4">Uploaded Files</h3>
                     <div className="space-y-3">
@@ -271,11 +266,10 @@ export default function AnnouncementDoc() {
                             </div>
                           </div>
                           <div className="flex items-center space-x-3">
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center space-x-2 ${
-                              doc.processingStatus === 'parsed' ? 'bg-green-100 text-green-800' : 
-                              doc.processingStatus === 'error' ? 'bg-red-100 text-red-800' : 
-                              'bg-yellow-100 text-yellow-800'
-                            }`}>
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center space-x-2 ${doc.processingStatus === 'parsed' ? 'bg-green-100 text-green-800' :
+                              doc.processingStatus === 'error' ? 'bg-red-100 text-red-800' :
+                                'bg-yellow-100 text-yellow-800'
+                              }`}>
                               {doc.processingStatus === 'processing' && (
                                 <svg className="animate-spin h-4 w-4 text-yellow-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -311,309 +305,171 @@ export default function AnnouncementDoc() {
                     </div>
                   </div>
                 </div>
-              
-            )}
+              )}
 
-            {activeTab === 'view' && documents.length > 0 && (
-              <div className="space-y-6">
-                {/* Document header */}
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h2 className="text-lg font-medium text-blue-900">
-                    {documents[0]?.liturgicalSeason}
-                  </h2>
-                  <p className="text-sm text-blue-600">
-                    {documents[0]?.documentDate && new Date(documents[0].documentDate).toLocaleDateString()}
-                  </p>
-                </div>
+              {activeTab === 'view' && documents.length > 0 && (
+                <div className="space-y-6">
+                  {/* Document selector if multiple docs */}
+                  {documents.length > 1 && (
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Select Document:</label>
+                      <select
+                        className="border rounded p-2"
+                        value={selectedDocument?._id || documents[0]._id}
+                        onChange={e => {
+                          const doc = documents.find(d => d._id === e.target.value);
+                          setSelectedDocument(doc);
+                        }}
+                      >
+                        {documents.map(doc => (
+                          <option key={doc._id} value={doc._id}>
+                            {doc.liturgicalSeason} - {doc.documentDate ? new Date(doc.documentDate).toLocaleDateString() : ''}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
 
-                {/* Document Content */}
-                <div className="bg-white rounded-lg shadow">
-                  <div className="border-b border-gray-200">
-                    <nav className="-mb-px flex space-x-8 px-6" aria-label="Tabs">
-                      <button
-                        onClick={() => setActiveSection('mass')}
-                        className={`${
-                          activeSection === 'mass'
-                            ? 'border-blue-500 text-blue-600'
-                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                        } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-                      >
-                        Mass Schedule
-                      </button>
-                      <button
-                        onClick={() => setActiveSection('announcements')}
-                        className={`${
-                          activeSection === 'announcements'
-                            ? 'border-blue-500 text-blue-600'
-                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                        } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-                      >
-                        Announcements
-                      </button>
-                      <button
-                        onClick={() => setActiveSection('matrimony')}
-                        className={`${
-                          activeSection === 'matrimony'
-                            ? 'border-blue-500 text-blue-600'
-                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                        } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-                      >
-                        Matrimony Notices
-                      </button>
-                    </nav>
+                  {/* Document header */}
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h2 className="text-lg font-medium text-blue-900">
+                      {currentDoc?.liturgicalSeason}
+                    </h2>
+                    <p className="text-sm text-blue-600">
+                      {currentDoc?.documentDate && new Date(currentDoc.documentDate).toLocaleDateString()}
+                    </p>
+                    <div className="mt-2 space-y-1">
+                      <div><span className="font-semibold">Occasion:</span> {currentDoc?.occasion || '—'}</div>
+                      <div><span className="font-semibold">Mass Animation:</span> {currentDoc?.massAnimation || '—'}</div>
+                      <div><span className="font-semibold">Next Week Occasion:</span> {currentDoc?.nextWeekOccasion || '—'}</div>
+                    </div>
                   </div>
 
-                  <div className="p-6">
-                    {activeSection === 'mass' && documents[0] && (
-                      <div className="space-y-6">
-                        <div>
-                          <h3 className="text-lg font-medium text-gray-900">Current Week Masses</h3>
-                          <div className="mt-3 space-y-2">
-                            {documents[0].currentWeekMass?.map((mass, index) => (
-                              <div key={index} className="flex justify-between items-center bg-gray-50 p-3 rounded-lg">
-                                <span className="font-medium">{mass.time}</span>
-                                <span className="text-gray-600">{mass.group}</span>
+                  {/* Document Content */}
+                  <div className="bg-white rounded-lg shadow">
+                    <div className="border-b border-gray-200">
+                      <nav className="-mb-px flex space-x-8 px-6" aria-label="Tabs">
+                        <button
+                          onClick={() => setActiveSection('mass')}
+                          className={`${activeSection === 'mass'
+                            ? 'border-blue-500 text-blue-600'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                        >
+                          Mass Schedule
+                        </button>
+                        <button
+                          onClick={() => setActiveSection('announcements')}
+                          className={`${activeSection === 'announcements'
+                            ? 'border-blue-500 text-blue-600'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                        >
+                          Announcements
+                        </button>
+                        <button
+                          onClick={() => setActiveSection('matrimony')}
+                          className={`${activeSection === 'matrimony'
+                            ? 'border-blue-500 text-blue-600'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                        >
+                          Matrimony Notices
+                        </button>
+                      </nav>
+                    </div>
+
+                    <div className="p-6">
+                      {activeSection === 'mass' && currentDoc && (
+                        <div className="space-y-6">
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {/* Current Week */}
+                            <div className="bg-white border rounded-lg p-6">
+                              <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                                <Calendar className="w-5 h-5 mr-2 text-blue-600" />
+                                This Week - {currentDoc.liturgicalSeason}
+                              </h3>
+                              <div className="space-y-3">
+                                {currentDoc?.currentWeekMass ? currentDoc.currentWeekMass.map((mass, index) => (
+                                  <div key={index} className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                                    <span className="font-medium text-blue-900">{mass.time}</span>
+                                    <span className="text-blue-700">{mass.group}</span>
+                                  </div>
+                                )) : <p className="text-gray-500">No masses scheduled</p>}
                               </div>
-                            ))}
+                            </div>
+
+                            {/* Next Week */}
+                            <div className="bg-white border rounded-lg p-6">
+                              <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                                <Calendar className="w-5 h-5 mr-2 text-green-600" />
+                                Next Week - {currentDoc?.nextWeekOccasion || 'Not set'}
+                              </h3>
+                              <div className="space-y-3">
+                                {currentDoc?.nextWeekMasses ? currentDoc.nextWeekMasses.map((mass, index) => (
+                                  <div key={index} className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                                    <span className="font-medium text-green-900">{mass.time}</span>
+                                    <span className="text-green-700">{mass.group}</span>
+                                  </div>
+                                )) : <p className="text-gray-500">No masses scheduled</p>}
+                              </div>
+                            </div>
                           </div>
                         </div>
+                      )}
 
-                        {documents[0].nextWeekMasses?.length > 0 && (
-                          <div className="mt-8">
-                            <div className="flex items-center justify-between mb-4">
-                              <h3 className="text-lg font-medium text-gray-900">Next Week Masses</h3>
-                              <span className="text-sm text-gray-500">
-                                {documents[0].nextWeekOccasion}
-                              </span>
+                      {activeSection === 'announcements' && (
+                        <div className="space-y-4">
+                          {(currentDoc?.announcements || []).map((announcement, index) => (
+                            <div key={announcement.id || index} className="bg-white border rounded-lg p-6">
+                              <div className="flex items-start justify-between mb-3">
+                                <h3 className="text-lg font-medium text-gray-900">{announcement.title}</h3>
+                                {announcement.priority && (
+                                  <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getPriorityColor(announcement.priority)}`}>
+                                    {announcement.priority} priority
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-gray-600 leading-relaxed">{announcement.content}</p>
                             </div>
-                            {documents[0].nextWeekDate && (
-                              <p className="text-sm text-gray-500 mb-3">
-                                {new Date(documents[0].nextWeekDate).toLocaleDateString()}
-                              </p>
-                            )}
-                            <div className="space-y-2">
-                              {documents[0].nextWeekMasses.map((mass, index) => (
-                                <div key={index} className="flex justify-between items-center bg-gray-50 p-3 rounded-lg">
-                                  <span className="font-medium">{mass.time}</span>
-                                  <span className="text-gray-600">{mass.group}</span>
+                          ))}
+                          {(!currentDoc?.announcements || currentDoc.announcements.length === 0) && (
+                            <p className="text-gray-500 text-center py-8">No announcements available</p>
+                          )}
+                        </div>
+                      )}
+
+                      {activeSection === 'matrimony' && (
+                        <div className="space-y-4">
+                          {(currentDoc?.matrimonyNotices || []).length > 0 ? (
+                            currentDoc.matrimonyNotices.map((notice, index) => (
+                              <div key={notice._id || index} className="bg-white border rounded-lg p-6">
+                                <div className="mb-2 text-center">
+                                  <h4 className="font-bold text-lg text-pink-900">{notice.groomName}</h4>
+                                  <p className="text-pink-700 text-sm">Son of {notice.groomParents}</p>
+                                  <div className="text-pink-800 font-medium my-2">❤️ & ❤️</div>
+                                  <h4 className="font-bold text-lg text-pink-900">{notice.brideName}</h4>
+                                  <p className="text-pink-700 text-sm">Daughter of {notice.brideParents}</p>
                                 </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {activeSection === 'announcements' && documents[0] && (
-                      <div className="space-y-4">
-                        {documents[0].announcement?.map((announcement, index) => (
-                          <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                            <div className="flex items-center justify-between mb-2">
-                              <h4 className="font-medium text-gray-900">{announcement.title}</h4>
-                              <span className={`px-2 py-1 rounded text-xs font-medium ${
-                                announcement.priority === 'High' ? 'bg-red-100 text-red-800' :
-                                announcement.priority === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
-                                'bg-green-100 text-green-800'
-                              }`}>
-                                {announcement.priority}
-                              </span>
-                            </div>
-                            <p className="text-gray-600">{announcement.constent}</p>
-                          </div>
-                        ))}
-                        {(!documents[0].announcement || documents[0].announcement.length === 0) && (
-                          <p className="text-gray-500 text-center py-4">No announcements available</p>
-                        )}
-                      </div>
-                    )}
-
-                    {activeSection === 'matrimony' && documents[0] && (
-                      <div className="space-y-4">
-                        {documents[0].matrimonyNotice?.map((notice, index) => (
-                          <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                            <h4 className="font-medium text-gray-900 mb-2">Wedding Announcement</h4>
-                            <div className="space-y-2 text-gray-600">
-                              <p><span className="font-medium">Groom:</span> {notice.groomName}</p>
-                              <p><span className="font-medium">Groom's Parents:</span> {notice.groomParents}</p>
-                              <p><span className="font-medium">Bride:</span> {notice.brideName}</p>
-                              <p><span className="font-medium">Bride's Parents:</span> {notice.brideParents}</p>
-                              <p><span className="font-medium">Wedding Date:</span> {notice.weddingDate && new Date(notice.weddingDate).toLocaleDateString()}</p>
-                              <p><span className="font-medium">Venue:</span> {notice.venue}</p>
-                            </div>
-                          </div>
-                        ))}
-                        {(!documents[0].matrimonyNotice || documents[0].matrimonyNotice.length === 0) && (
-                          <p className="text-gray-500 text-center py-4">No matrimony notices available</p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Collapsible Sections */}
-                <div className="space-y-4">
-                  {/* Mass Schedule Section */}
-                  <div className="bg-white border rounded-lg">
-                    <button
-                      onClick={() => toggleSection('masses')}
-                      className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <Calendar className="w-5 h-5 text-purple-600" />
-                        <h3 className="font-medium text-gray-900">Mass Schedule</h3>
-                        <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs">
-                          {selectedDocument?.massSchedule ? Object.keys(selectedDocument.massSchedule).length : 0} masses
-                        </span>
-                      </div>
-                      {expandedSections.masses ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-                    </button>
-                    {expandedSections.masses && (
-                      <div className="border-t p-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {selectedDocument?.massSchedule ? Object.entries(selectedDocument.massSchedule).map(([time, group]) => (
-                            <div key={time} className="bg-purple-50 rounded-lg p-3">
-                              <p className="font-medium text-purple-900">{time}</p>
-                              <p className="text-purple-700 text-sm">{group}</p>
-                            </div>
-                          )) : <p className="text-gray-500 p-3">No masses scheduled</p>}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Announcements Section */}
-                  <div className="bg-white border rounded-lg">
-                    <button
-                      onClick={() => toggleSection('announcements')}
-                      className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <Bell className="w-5 h-5 text-orange-600" />
-                        <h3 className="font-medium text-gray-900">Announcements</h3>
-                        <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs">
-                          {selectedDocument?.announcements?.length || 0} items
-                        </span>
-                      </div>
-                      {expandedSections.announcements ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-                    </button>
-                    {expandedSections.announcements && (
-                      <div className="border-t p-4">
-                        <div className="space-y-4">
-                          {selectedDocument.announcements.map((announcement) => (
-                            <div key={announcement.id} className="border border-gray-200 rounded-lg p-4">
-                              <div className="flex items-start justify-between mb-2">
-                                <h4 className="font-medium text-gray-900">{announcement.title}</h4>
-                                <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getPriorityColor(announcement.priority)}`}>
-                                  {announcement.priority}
-                                </span>
+                                <div className="border-t border-pink-200 pt-3 text-center">
+                                  <p className="text-pink-800 font-medium">Wedding Date: {notice.weddingDate ? new Date(notice.weddingDate).toLocaleDateString() : '—'}</p>
+                                  <p className="text-pink-700 text-sm">{notice.venue}</p>
+                                </div>
                               </div>
-                              <p className="text-gray-600 text-sm">{announcement.content}</p>
-                            </div>
-                          ))}
+                            ))
+                          ) : (
+                            <p className="text-gray-500 text-center py-8">No matrimony notices available</p>
+                          )}
                         </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Matrimony Section */}
-                  <div className="bg-white border rounded-lg">
-                    <button
-                      onClick={() => toggleSection('matrimony')}
-                      className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <Users className="w-5 h-5 text-pink-600" />
-                        <h3 className="font-medium text-gray-900">Matrimony Notices</h3>
-                        <span className="bg-pink-100 text-pink-800 px-2 py-1 rounded-full text-xs">
-                          {selectedDocument?.matrimonyNotices?.length} notices
-                        </span>
-                      </div>
-                      {expandedSections.matrimony ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-                    </button>
-                    {expandedSections.matrimony && (
-                      <div className="border-t p-4">
-                        <div className="space-y-4">
-                          {selectedDocument.matrimonyNotices.map((notice, index) => (
-                            <div key={index} className="bg-pink-50 border border-pink-200 rounded-lg p-4">
-                              <div className="text-center mb-4">
-                                <h4 className="font-bold text-pink-900 text-lg">{notice.groomName}</h4>
-                                <p className="text-pink-700 text-sm">Son of {notice.groomParents}</p>
-                                <div className="text-pink-800 font-medium my-2">❤️ & ❤️</div>
-                                <h4 className="font-bold text-pink-900 text-lg">{notice.brideName}</h4>
-                                <p className="text-pink-700 text-sm">Daughter of {notice.brideParents}</p>
-                              </div>
-                              <div className="border-t border-pink-200 pt-3 text-center">
-                                <p className="text-pink-800 font-medium">Wedding Date: {new Date(notice.weddingDate).toLocaleDateString()}</p>
-                                <p className="text-pink-700 text-sm">{notice.venue}</p>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'schedule' && (
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Current Week */}
-                  <div className="bg-white border rounded-lg p-6">
-                    <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                      <Calendar className="w-5 h-5 mr-2 text-blue-600" />
-                      This Week - {selectedDocument.liturgicalSeason}
-                    </h3>
-                    <div className="space-y-3">
-                      {selectedDocument?.massSchedule ? Object.entries(selectedDocument.massSchedule).map(([time, group]) => (
-                        <div key={time} className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                          <span className="font-medium text-blue-900">{time}</span>
-                          <span className="text-blue-700">{group}</span>
-                        </div>
-                      )) : <p className="text-gray-500">No masses scheduled</p>}
-                    </div>
-                  </div>
-
-                  {/* Next Week */}
-                  <div className="bg-white border rounded-lg p-6">
-                    <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                      <Calendar className="w-5 h-5 mr-2 text-green-600" />
-                      Next Week - {selectedDocument?.nextWeekSchedule?.occasion || 'Not set'}
-                    </h3>
-                    <div className="space-y-3">
-                      {selectedDocument?.nextWeekSchedule?.masses ? Object.entries(selectedDocument.nextWeekSchedule.masses).map(([time, group]) => (
-                        <div key={time} className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                          <span className="font-medium text-green-900">{time}</span>
-                          <span className="text-green-700">{group}</span>
-                        </div>
-                      )) : <p className="text-gray-500">No masses scheduled</p>}
+                      )}
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
-
-            {activeTab === 'announcements' && (
-              <div className="space-y-4">
-                {(selectedDocument?.announcements || []).map((announcement) => (
-                  <div key={announcement.id} className="bg-white border rounded-lg p-6">
-                    <div className="flex items-start justify-between mb-3">
-                      <h3 className="text-lg font-medium text-gray-900">{announcement.title}</h3>
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getPriorityColor(announcement.priority)}`}>
-                        {announcement.priority} priority
-                      </span>
-                    </div>
-                    <p className="text-gray-600 leading-relaxed">{announcement.content}</p>
-                  </div>
-                ))}
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
     </Layout>
   );
 }
-
