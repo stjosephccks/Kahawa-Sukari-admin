@@ -1,38 +1,39 @@
 const { Schema, model, models } = require("mongoose");
 
 const massScheduleSchema =  new Schema({
-    time:{type:String, required:true},
-    group:{type:String, required:true}
+    time:{type:String, required:false},
+    group:{type:String, required:false}
 
 });
 
 const listAnnouncementsSchema = new Schema({
-    title:{type:String, required:true},
-    constent:{type:String, required:true},
+    title:{type:String, required:false},
+    content:{type:String, required:false},
     priority:{
         type:String,
         enum:['High','Medium','Low'],
         default:'Medium'
     },
-    createdAt:{type:Date},default:Date.now
+    createdAt:{type:Date,default:Date.now}
 
 
 });
 const matrimonyNoticeSchema = new Schema({
-    groomName: { type: String, required: true },
-    groomParents: { type: String, required: true },
-    brideName: { type: String, required: true },
-    brideParents: { type: String, required: true },
-    weddingDate: { type: Date, required: true },
-    venue: { type: String, required: true }
+    groomName: { type: String, required: false },
+    groomParents: { type: String, required: false },
+    brideName: { type: String, required: false },
+    brideParents: { type: String, required: false },
+    weddingDate: { type: Date, required: false },
+    venue: { type: String, required: false }
 
 });
 
 const AnnouncementDocumentSchema = new Schema({
-originalFileName : {type:String, required:true},
+originalFileName : {type:String, required:false},
 uploadeddate: {type:Date, default: Date.now},
-documentDate:{type:Date, required:true},
-liturgicalSeason: {type:String, required:true},
+documentDate:{type:Date, required: false},
+liturgicalSeason: {type:String, required: false},
+massAnimation:{type:String, required:false},
 
 //Mass Schedule
 currentWeekMass:[massScheduleSchema],
@@ -42,8 +43,8 @@ nextWeekDate: { type: Date },
 
 //Announcements
 
-announcement:[listAnnouncementsSchema],
-matrimonyNotice:[matrimonyNoticeSchema],
+announcements:[listAnnouncementsSchema],
+matrimonyNotices:[matrimonyNoticeSchema],
 
 awsS3Key: { type: String }, // If storing in AWS S3
 fileUrl: { type: String },

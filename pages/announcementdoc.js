@@ -1,97 +1,133 @@
 'use client'
-import React, { useState, useRef } from 'react';
-import { Upload, Calendar, Users, Bell, FileText, ChevronDown, ChevronUp, X } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Upload, Calendar, Users, Bell, FileText, ChevronDown, ChevronUp, X, Trash2, Edit } from 'lucide-react';
 import Layout from '@/components/Layout';
+import axios from 'axios';
 
-// Mock data based on your document
-const mockParsedData = {
-  date: "2025-05-25",
-  liturgicalSeason: "Sixth Sunday of Easter",
-  massSchedule: {
-    "7:30 AM": "ST ANNE",
-    "9:00 AM": "CMA",
-    "10:30 AM": "ST MARY",
-    "12:00 NOON": "ST PETER",
-    "WENDANI 9:30 AM": "ST CATHERINE"
-  },
-  nextWeekSchedule: {
-    date: "2025-06-01",
-    occasion: "THE ASCENSION OF THE LORD",
-    masses: {
-      "7:30 AM": "ST AMBROSE",
-      "9:00 AM": "ST BENEDICT",
-      "10:30 AM": "PMC",
-      "12:00 NOON": "ST PAUL",
-      "WENDANI 9:30 AM": "ST DOMINIC"
-    }
-  },
-  announcements: [
-    {
-      id: 1,
-      title: "Second Marriage Preparation Course",
-      content: "Will start on 8th of June in the former social office of the parish. All interested couples are invited to register by Sunday 8th of June with the catechist or the parish secretary.",
-      priority: "high"
-    },
-    {
-      id: 2,
-      title: "Cardinal Otunga Beautification Process",
-      content: "His Grace Archbishop Philip Anyolo invites representatives to dinner on Friday 30th May at Consolata Shrine. Contribution of minimum Kshs 3,000 requested from each Jumuiya.",
-      priority: "medium"
-    },
-    {
-      id: 3,
-      title: "Subukia Pilgrimage",
-      content: "Jumuiya officials requested to make payments for registered pilgrims for logistic purposes.",
-      priority: "medium"
-    },
-    {
-      id: 4,
-      title: "Adult Catechumen Registration",
-      content: "Registrations and catechesis is ongoing with the catechists.",
-      priority: "low"
-    }
-  ],
-  matrimonyNotices: [
-    {
-      groomName: "WILSON KIMANI KAMAU",
-      groomParents: "DAVID KARIUKI RITWA & FRIDA WAITHIRA KAMAU",
-      brideName: "ELIZABETH WAMBUI NDUNGU",
-      brideParents: "NDUNG'U MUBIA MAHIUHA & VERONICA WANGUI NDUNG'U",
-      weddingDate: "2025-07-10",
-      venue: "ST FRANCIS OF ASSISI MWIHOKO PARISH"
-    }
-  ]
-};
-
-const AnnouncementDocument = () => {
+export default function AnnouncementDoc() {
+  const [documents, setDocuments] = useState([]);
   const [uploadedFiles, setUploadedFiles] = useState([]);
-  const [parsedDocuments, setParsedDocuments] = useState([mockParsedData]);
-  const [selectedDocument, setSelectedDocument] = useState(mockParsedData);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('upload');
+  const [activeSection, setActiveSection] = useState('mass');
+  const [selectedDocument, setSelectedDocument] = useState(null);
   const [expandedSections, setExpandedSections] = useState({
-    masses: true,
-    announcements: true,
-    matrimony: true
+    masses: false,
+    announcements: false,
+    documents: false
   });
   const fileInputRef = useRef(null);
 
-  const handleFileUpload = (event) => {
-    const files = Array.from(event.target.files);
-    setUploadedFiles(prev => [...prev, ...files.map(file => ({
-      id: Date.now() + Math.random(),
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      uploadDate: new Date().toISOString(),
-      status: 'uploaded'
-    }))]);
+
+  useEffect(() => {
+    fetchDocuments();
+  }, []);
+
+  const fetchDocuments = async () => {
+    try {
+      const response = await axios.get('/api/announcemet-docs');
+      setDocuments(response.data);
+      if (response.data.length > 0) {
+        setActiveTab('view');
+        setSelectedDocument(response.data[0]);
+      }
+    } catch (err) {
+      setError('Failed to fetch documents');
+      console.error(err);
+    }
   };
 
-  const parseDocument = (fileId) => {
-    // In real implementation, this would parse the actual document
-    setUploadedFiles(prev => prev.map(file => 
-      file.id === fileId ? { ...file, status: 'parsed' } : file
-    ));
+  const handleFileUpload = async (event) => {
+    const files = Array.from(event.target.files);
+    if (files.length > 1) {
+      setError('Please upload only one document at a time');
+      event.target.value = null;
+      return;
+    }
+
+    // Check if there's already a file being processed
+    if (uploadedFiles.length > 0) {
+      setError('Please wait for the current document to finish processing');
+      event.target.value = null;
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    const file = files[0];
+    try {
+      // Add file to uploadedFiles first
+      setUploadedFiles([{ name: file.name, status: 'uploading' }]);
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('originalFileName', file.name);
+
+      await axios.post('/api/announcemet-docs', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      // Update file status to success
+      setUploadedFiles([{ name: file.name, status: 'completed' }]);
+      await fetchDocuments();
+      setActiveTab('view');
+    } catch (err) {
+      // Update file status to error
+      setUploadedFiles([{ name: file.name, status: 'error' }]);
+      setError(err.response?.data?.error || `Failed to upload ${file.name}: ${err.message}`);
+      console.error(err);
+    } finally {
+      setLoading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = null;
+      }
+    }
+  };
+
+  const deleteDocument = async (docId) => {
+    if (!confirm('Are you sure you want to delete this document?')) return;
+
+    try {
+      setLoading(true);
+      await axios.delete(`/api/announcemet-docs?id=${docId}`);
+      await fetchDocuments();
+      setUploadedFiles(prev => prev.filter(file => file.id !== docId));
+      if (selectedDocument?._id === docId) {
+        setSelectedDocument(null);
+      }
+    } catch (err) {
+      setError(`Failed to delete document: ${err.message}`);
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateDocument = async (docId, file) => {
+    try {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('originalFileName', file.name);
+      formData.append('_id', docId);
+
+      await axios.put('/api/announcemet-docs', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      await fetchDocuments();
+    } catch (err) {
+      setError(`Failed to update document: ${err.message}`);
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const toggleSection = (section) => {
@@ -147,76 +183,271 @@ const AnnouncementDocument = () => {
           </div>
 
           <div className="p-6">
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+                {error}
+                <button
+                  onClick={() => setError(null)}
+                  className="float-right text-red-700 hover:text-red-900"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            )}
+
+            {loading && (
+              <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg mb-6">
+                Processing... Please wait
+              </div>
+            )}
+
             {activeTab === 'upload' && (
-              <div className="space-y-6">
-                {/* File Upload Section */}
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors">
-                  <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Upload Church Documents</h3>
-                  <p className="text-gray-600 mb-4">Drag and drop your .docx files here, or click to browse</p>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    multiple
-                    accept=".docx,.doc"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                  />
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              <div className="space-y-4">
+                <div className="flex items-center justify-center w-full">
+                  <label 
+                    htmlFor="dropzone-file" 
+                    className={`flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${loading || uploadedFiles.length > 0 ? 'border-gray-200 bg-gray-50' : 'border-gray-300 bg-gray-50 hover:bg-gray-100'}`}
                   >
-                    Choose Files
-                  </button>
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <Upload className={`w-10 h-10 mb-3 ${loading || uploadedFiles.length > 0 ? 'text-gray-300' : 'text-gray-400'}`} />
+                      <p className="mb-2 text-sm text-gray-500">
+                        <span className="font-semibold">Click to upload</span> or drag and drop
+                      </p>
+                      <p className="text-xs text-gray-500">Word document (.docx)</p>
+                      {loading && (
+                        <div className="mt-4 text-blue-600">
+                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                          <p className="text-sm">Processing document...</p>
+                        </div>
+                      )}
+                    </div>
+                    <input
+                      ref={fileInputRef}
+                      id="dropzone-file"
+                      type="file"
+                      className="hidden"
+                      accept=".docx"
+                      onChange={handleFileUpload}
+                      disabled={loading || uploadedFiles.length > 0}
+                    />
+                  </label>
                 </div>
 
-                {/* Uploaded Files List */}
+                {/* Upload Status */}
                 {uploadedFiles.length > 0 && (
+                  <div className="mt-4">
+                    {uploadedFiles.map((file, index) => (
+                      <div key={index} className={`p-4 rounded-lg ${file.status === 'error' ? 'bg-red-50' : file.status === 'completed' ? 'bg-green-50' : 'bg-blue-50'}`}>
+                        <div className="flex items-center">
+                          <FileText className="w-5 h-5 mr-2 text-gray-500" />
+                          <span className="flex-1 text-sm text-gray-900">{file.name}</span>
+                          <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full ${file.status === 'error' ? 'bg-red-100 text-red-800' : file.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}>
+                            {file.status}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Error Message */}
+                {error && (
+                  <div className="p-4 bg-red-50 rounded-lg">
+                    <p className="text-sm text-red-800">{error}</p>
+                  </div>
+                )}
                   <div>
                     <h3 className="text-lg font-medium text-gray-900 mb-4">Uploaded Files</h3>
                     <div className="space-y-3">
-                      {uploadedFiles.map((file) => (
-                        <div key={file.id} className="bg-gray-50 rounded-lg p-4 flex items-center justify-between">
+                      {documents.map((doc) => (
+                        <div key={doc._id} className="bg-gray-50 rounded-lg p-4 flex items-center justify-between">
                           <div className="flex items-center space-x-3">
                             <FileText className="w-8 h-8 text-blue-600" />
                             <div>
-                              <p className="font-medium text-gray-900">{file.name}</p>
+                              <p className="font-medium text-gray-900">{doc.originalFileName}</p>
                               <p className="text-sm text-gray-500">
-                                {(file.size / 1024).toFixed(1)} KB • Uploaded {new Date(file.uploadDate).toLocaleDateString()}
+                                Uploaded {new Date(doc.uploadeddate).toLocaleDateString()}
                               </p>
                             </div>
                           </div>
                           <div className="flex items-center space-x-3">
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                              file.status === 'parsed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center space-x-2 ${
+                              doc.processingStatus === 'parsed' ? 'bg-green-100 text-green-800' : 
+                              doc.processingStatus === 'error' ? 'bg-red-100 text-red-800' : 
+                              'bg-yellow-100 text-yellow-800'
                             }`}>
-                              {file.status === 'parsed' ? 'Parsed' : 'Ready to Parse'}
+                              {doc.processingStatus === 'processing' && (
+                                <svg className="animate-spin h-4 w-4 text-yellow-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                              )}
+                              <span>{doc.processingStatus.charAt(0).toUpperCase() + doc.processingStatus.slice(1)}</span>
                             </span>
-                            {file.status !== 'parsed' && (
+                            <div className="flex space-x-2">
+                              <label className="cursor-pointer bg-blue-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors">
+                                <input
+                                  type="file"
+                                  className="hidden"
+                                  accept=".docx,.doc"
+                                  onChange={(e) => {
+                                    if (e.target.files?.[0]) {
+                                      handleUpdateDocument(doc._id, e.target.files[0]);
+                                    }
+                                  }}
+                                />
+                                <Edit className="w-4 h-4" />
+                              </label>
                               <button
-                                onClick={() => parseDocument(file.id)}
-                                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors"
+                                onClick={() => deleteDocument(doc._id)}
+                                className="bg-red-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-red-700 transition-colors"
                               >
-                                Parse Document
+                                <Trash2 className="w-4 h-4" />
                               </button>
-                            )}
+                            </div>
                           </div>
                         </div>
                       ))}
                     </div>
                   </div>
-                )}
-              </div>
+                </div>
+              
             )}
 
-            {activeTab === 'view' && (
+            {activeTab === 'view' && documents.length > 0 && (
               <div className="space-y-6">
-                {/* Document Selector */}
-                <div className="bg-blue-50 rounded-lg p-4">
-                  <h3 className="font-medium text-blue-900 mb-2">
-                    {selectedDocument.liturgicalSeason} - {new Date(selectedDocument.date).toLocaleDateString()}
-                  </h3>
-                  <p className="text-blue-700 text-sm">Complete parsed document data</p>
+                {/* Document header */}
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h2 className="text-lg font-medium text-blue-900">
+                    {documents[0]?.liturgicalSeason}
+                  </h2>
+                  <p className="text-sm text-blue-600">
+                    {documents[0]?.documentDate && new Date(documents[0].documentDate).toLocaleDateString()}
+                  </p>
+                </div>
+
+                {/* Document Content */}
+                <div className="bg-white rounded-lg shadow">
+                  <div className="border-b border-gray-200">
+                    <nav className="-mb-px flex space-x-8 px-6" aria-label="Tabs">
+                      <button
+                        onClick={() => setActiveSection('mass')}
+                        className={`${
+                          activeSection === 'mass'
+                            ? 'border-blue-500 text-blue-600'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                        } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                      >
+                        Mass Schedule
+                      </button>
+                      <button
+                        onClick={() => setActiveSection('announcements')}
+                        className={`${
+                          activeSection === 'announcements'
+                            ? 'border-blue-500 text-blue-600'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                        } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                      >
+                        Announcements
+                      </button>
+                      <button
+                        onClick={() => setActiveSection('matrimony')}
+                        className={`${
+                          activeSection === 'matrimony'
+                            ? 'border-blue-500 text-blue-600'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                        } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                      >
+                        Matrimony Notices
+                      </button>
+                    </nav>
+                  </div>
+
+                  <div className="p-6">
+                    {activeSection === 'mass' && documents[0] && (
+                      <div className="space-y-6">
+                        <div>
+                          <h3 className="text-lg font-medium text-gray-900">Current Week Masses</h3>
+                          <div className="mt-3 space-y-2">
+                            {documents[0].currentWeekMass?.map((mass, index) => (
+                              <div key={index} className="flex justify-between items-center bg-gray-50 p-3 rounded-lg">
+                                <span className="font-medium">{mass.time}</span>
+                                <span className="text-gray-600">{mass.group}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {documents[0].nextWeekMasses?.length > 0 && (
+                          <div className="mt-8">
+                            <div className="flex items-center justify-between mb-4">
+                              <h3 className="text-lg font-medium text-gray-900">Next Week Masses</h3>
+                              <span className="text-sm text-gray-500">
+                                {documents[0].nextWeekOccasion}
+                              </span>
+                            </div>
+                            {documents[0].nextWeekDate && (
+                              <p className="text-sm text-gray-500 mb-3">
+                                {new Date(documents[0].nextWeekDate).toLocaleDateString()}
+                              </p>
+                            )}
+                            <div className="space-y-2">
+                              {documents[0].nextWeekMasses.map((mass, index) => (
+                                <div key={index} className="flex justify-between items-center bg-gray-50 p-3 rounded-lg">
+                                  <span className="font-medium">{mass.time}</span>
+                                  <span className="text-gray-600">{mass.group}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {activeSection === 'announcements' && documents[0] && (
+                      <div className="space-y-4">
+                        {documents[0].announcement?.map((announcement, index) => (
+                          <div key={index} className="bg-gray-50 p-4 rounded-lg">
+                            <div className="flex items-center justify-between mb-2">
+                              <h4 className="font-medium text-gray-900">{announcement.title}</h4>
+                              <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                announcement.priority === 'High' ? 'bg-red-100 text-red-800' :
+                                announcement.priority === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-green-100 text-green-800'
+                              }`}>
+                                {announcement.priority}
+                              </span>
+                            </div>
+                            <p className="text-gray-600">{announcement.constent}</p>
+                          </div>
+                        ))}
+                        {(!documents[0].announcement || documents[0].announcement.length === 0) && (
+                          <p className="text-gray-500 text-center py-4">No announcements available</p>
+                        )}
+                      </div>
+                    )}
+
+                    {activeSection === 'matrimony' && documents[0] && (
+                      <div className="space-y-4">
+                        {documents[0].matrimonyNotice?.map((notice, index) => (
+                          <div key={index} className="bg-gray-50 p-4 rounded-lg">
+                            <h4 className="font-medium text-gray-900 mb-2">Wedding Announcement</h4>
+                            <div className="space-y-2 text-gray-600">
+                              <p><span className="font-medium">Groom:</span> {notice.groomName}</p>
+                              <p><span className="font-medium">Groom's Parents:</span> {notice.groomParents}</p>
+                              <p><span className="font-medium">Bride:</span> {notice.brideName}</p>
+                              <p><span className="font-medium">Bride's Parents:</span> {notice.brideParents}</p>
+                              <p><span className="font-medium">Wedding Date:</span> {notice.weddingDate && new Date(notice.weddingDate).toLocaleDateString()}</p>
+                              <p><span className="font-medium">Venue:</span> {notice.venue}</p>
+                            </div>
+                          </div>
+                        ))}
+                        {(!documents[0].matrimonyNotice || documents[0].matrimonyNotice.length === 0) && (
+                          <p className="text-gray-500 text-center py-4">No matrimony notices available</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Collapsible Sections */}
@@ -231,7 +462,7 @@ const AnnouncementDocument = () => {
                         <Calendar className="w-5 h-5 text-purple-600" />
                         <h3 className="font-medium text-gray-900">Mass Schedule</h3>
                         <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs">
-                          {Object.keys(selectedDocument.massSchedule).length} masses
+                          {selectedDocument?.massSchedule ? Object.keys(selectedDocument.massSchedule).length : 0} masses
                         </span>
                       </div>
                       {expandedSections.masses ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
@@ -239,12 +470,12 @@ const AnnouncementDocument = () => {
                     {expandedSections.masses && (
                       <div className="border-t p-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {Object.entries(selectedDocument.massSchedule).map(([time, group]) => (
+                          {selectedDocument?.massSchedule ? Object.entries(selectedDocument.massSchedule).map(([time, group]) => (
                             <div key={time} className="bg-purple-50 rounded-lg p-3">
                               <p className="font-medium text-purple-900">{time}</p>
                               <p className="text-purple-700 text-sm">{group}</p>
                             </div>
-                          ))}
+                          )) : <p className="text-gray-500 p-3">No masses scheduled</p>}
                         </div>
                       </div>
                     )}
@@ -260,7 +491,7 @@ const AnnouncementDocument = () => {
                         <Bell className="w-5 h-5 text-orange-600" />
                         <h3 className="font-medium text-gray-900">Announcements</h3>
                         <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs">
-                          {selectedDocument.announcements.length} items
+                          {selectedDocument?.announcements?.length || 0} items
                         </span>
                       </div>
                       {expandedSections.announcements ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
@@ -294,7 +525,7 @@ const AnnouncementDocument = () => {
                         <Users className="w-5 h-5 text-pink-600" />
                         <h3 className="font-medium text-gray-900">Matrimony Notices</h3>
                         <span className="bg-pink-100 text-pink-800 px-2 py-1 rounded-full text-xs">
-                          {selectedDocument.matrimonyNotices.length} notices
+                          {selectedDocument?.matrimonyNotices?.length} notices
                         </span>
                       </div>
                       {expandedSections.matrimony ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
@@ -335,12 +566,12 @@ const AnnouncementDocument = () => {
                       This Week - {selectedDocument.liturgicalSeason}
                     </h3>
                     <div className="space-y-3">
-                      {Object.entries(selectedDocument.massSchedule).map(([time, group]) => (
+                      {selectedDocument?.massSchedule ? Object.entries(selectedDocument.massSchedule).map(([time, group]) => (
                         <div key={time} className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
                           <span className="font-medium text-blue-900">{time}</span>
                           <span className="text-blue-700">{group}</span>
                         </div>
-                      ))}
+                      )) : <p className="text-gray-500">No masses scheduled</p>}
                     </div>
                   </div>
 
@@ -348,15 +579,15 @@ const AnnouncementDocument = () => {
                   <div className="bg-white border rounded-lg p-6">
                     <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
                       <Calendar className="w-5 h-5 mr-2 text-green-600" />
-                      Next Week - {selectedDocument.nextWeekSchedule.occasion}
+                      Next Week - {selectedDocument?.nextWeekSchedule?.occasion || 'Not set'}
                     </h3>
                     <div className="space-y-3">
-                      {Object.entries(selectedDocument.nextWeekSchedule.masses).map(([time, group]) => (
+                      {selectedDocument?.nextWeekSchedule?.masses ? Object.entries(selectedDocument.nextWeekSchedule.masses).map(([time, group]) => (
                         <div key={time} className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
                           <span className="font-medium text-green-900">{time}</span>
                           <span className="text-green-700">{group}</span>
                         </div>
-                      ))}
+                      )) : <p className="text-gray-500">No masses scheduled</p>}
                     </div>
                   </div>
                 </div>
@@ -365,7 +596,7 @@ const AnnouncementDocument = () => {
 
             {activeTab === 'announcements' && (
               <div className="space-y-4">
-                {selectedDocument.announcements.map((announcement) => (
+                {(selectedDocument?.announcements || []).map((announcement) => (
                   <div key={announcement.id} className="bg-white border rounded-lg p-6">
                     <div className="flex items-start justify-between mb-3">
                       <h3 className="text-lg font-medium text-gray-900">{announcement.title}</h3>
@@ -384,6 +615,5 @@ const AnnouncementDocument = () => {
     </div>
     </Layout>
   );
-};
+}
 
-export default AnnouncementDocument;

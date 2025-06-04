@@ -214,6 +214,18 @@ const AnnouncementDocument = () => {
                   <h3 className="font-medium text-blue-900 mb-2">
                     {selectedDocument.liturgicalSeason} - {new Date(selectedDocument.date).toLocaleDateString()}
                   </h3>
+                  {selectedDocument.occasion && (
+                    <div className="mb-1">
+                      <span className="block text-sm font-semibold text-indigo-700">Occasion:</span>
+                      <span className="block text-indigo-900">{selectedDocument.occasion}</span>
+                    </div>
+                  )}
+                  {selectedDocument.massAnimation && (
+                    <div className="mb-1">
+                      <span className="block text-sm font-semibold text-green-700">Mass Animation:</span>
+                      <span className="block text-green-900">{selectedDocument.massAnimation}</span>
+                    </div>
+                  )}
                   <p className="text-blue-700 text-sm">Complete parsed document data</p>
                 </div>
 
@@ -332,6 +344,18 @@ const AnnouncementDocument = () => {
                       <Calendar className="w-5 h-5 mr-2 text-blue-600" />
                       This Week - {selectedDocument.liturgicalSeason}
                     </h3>
+                    {selectedDocument.occasion && (
+                      <div className="mb-2">
+                        <span className="block text-sm font-semibold text-indigo-700">Occasion:</span>
+                        <span className="block text-indigo-900">{selectedDocument.occasion}</span>
+                      </div>
+                    )}
+                    {selectedDocument.massAnimation && (
+                      <div className="mb-2">
+                        <span className="block text-sm font-semibold text-green-700">Mass Animation:</span>
+                        <span className="block text-green-900">{selectedDocument.massAnimation}</span>
+                      </div>
+                    )}
                     <div className="space-y-3">
                       {Object.entries(selectedDocument.massSchedule).map(([time, group]) => (
                         <div key={time} className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
@@ -348,6 +372,12 @@ const AnnouncementDocument = () => {
                       <Calendar className="w-5 h-5 mr-2 text-green-600" />
                       Next Week - {selectedDocument.nextWeekSchedule.occasion}
                     </h3>
+                    {selectedDocument.nextWeekSchedule && selectedDocument.nextWeekSchedule.occasion && (
+                      <div className="mb-2">
+                        <span className="block text-sm font-semibold text-indigo-700">Occasion:</span>
+                        <span className="block text-indigo-900">{selectedDocument.nextWeekSchedule.occasion}</span>
+                      </div>
+                    )}
                     <div className="space-y-3">
                       {Object.entries(selectedDocument.nextWeekSchedule.masses).map(([time, group]) => (
                         <div key={time} className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
