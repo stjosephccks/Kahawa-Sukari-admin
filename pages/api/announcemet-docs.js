@@ -46,6 +46,8 @@ export default async function handle(req, res) {
             const originalFileName = fields.originalFileName?.[0];
 
             if (!originalFileName || !file) {
+
+
                 return res.status(400).json({ error: 'Both file and originalFileName are required' });
             }
 
