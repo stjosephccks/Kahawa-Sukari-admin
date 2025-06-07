@@ -6,13 +6,16 @@ import { useRouter } from "next/router.js";
 import Spinner from "./Spinner.js";
 import Image from "next/image.js";
 
+const BULLETIN_SECTIONS = ["YCA", "YSC", "CJPD", "MATRIMONY", "CHATECHISIS"];
+
 export default function RichText({
     _id,
     title:existingTitle,
     images:existingImages,
     description:existingDescription,
-    content:existingContent
-
+    content:existingContent,
+    sections:existingSections,
+    formType // Added to determine if sections should be shown
 
 }){
     const [content, setContent]=useState(existingContent||'')
@@ -22,11 +25,13 @@ export default function RichText({
     const [images,setImages]=useState(existingImages||[])
     const [description,setDescription]=useState(existingDescription||'')
     const [loadedImages, setLoadedImages] = useState(Array(images.length).fill(false));
+    const [sections, setSections] = useState(existingSections || []);
 
 
     async function saveBulletin(ev){
         ev.preventDefault()
-        const data={title,content,description, images}
+        const data={title,content,description, images, sections: formType === 'bulletin' ? sections : undefined}
+        // Only include sections if formType is bulletin
         if(_id){
             await axios.put('/api/bulletin',{...data,_id})
         }
@@ -79,6 +84,32 @@ export default function RichText({
             <input value={title} onChange={ev=>setTitle(ev.target.value)} type="text" placeholder="title"/>
             <label>Description</label>
             <textarea   placeholder="Description" value={description} onChange={ev=>setDescription(ev.target.value)} rows={5}></textarea>
+
+            {formType === "bulletin" && (
+                <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Sections</label>
+                    <div className="space-y-2 grid grid-cols-2 md:grid-cols-3 gap-2">
+                        {BULLETIN_SECTIONS.map((section) => (
+                            <label key={section} className="flex items-center p-2 border rounded-md hover:bg-gray-50 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                                    checked={sections.includes(section)}
+                                    onChange={() => {
+                                        setSections(prevSections =>
+                                            prevSections.includes(section)
+                                                ? prevSections.filter(s => s !== section)
+                                                : [...prevSections, section]
+                                        );
+                                    }}
+                                />
+                                <span className="ml-2 text-sm text-gray-700">{section}</span>
+                            </label>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             <label>Cover Photo</label>
 
           

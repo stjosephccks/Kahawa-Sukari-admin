@@ -5,7 +5,7 @@ export default function NewBulletin(){
     return(
         <Layout>
             <h1>New Bulletin</h1>
-            <RichText/>
+            <RichText formType="bulletin" />
         </Layout>
     )
 }

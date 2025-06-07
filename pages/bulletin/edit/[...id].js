@@ -21,7 +21,7 @@ useEffect(()=>{
     return(
         <Layout>
             {bulletinInfo&& (
-                <RichText {...bulletinInfo }/>
+                <RichText {...bulletinInfo} formType="bulletin" />
             )   
             }
                  
