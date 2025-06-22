@@ -1,7 +1,10 @@
+'use client';
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import Logo from "./Logo";
+import DailyReadings from './DailyReadings'; 
+
 
 
 export default function Nav({ show }) {
@@ -72,6 +75,14 @@ export default function Nav({ show }) {
 
                     Sundays
                 </Link>
+                <Link href={'/daily-readings'} className={pathname.includes('/daily-readings') ? activeLink : inactiveLink}>
+                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={pathname.includes('/daily-readings') ? activeIcon : inactiveIcon}>
+                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-6h6v6m2 4H7a2 2 0 01-2-2V5a2 2 0 012-2h5.5L17 7.5V19a2 2 0 01-2 2z" />
+                </svg>
+                  Daily Readings
+               </Link>
+
+
 
                 <button onClick={logout} className={inactiveLink}>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
