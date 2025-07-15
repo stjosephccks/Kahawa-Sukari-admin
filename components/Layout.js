@@ -95,7 +95,7 @@ export default function Layout({ children }) {
               Login
             </button>
 
-            <div className="mt-4">
+            {/* <div className="mt-4">
               <button
                 type="button"
                 onClick={() => signIn("google")}
@@ -103,7 +103,7 @@ export default function Layout({ children }) {
               >
                 Login with Google
               </button>
-            </div>
+            </div> */}
           </form>
         </div>
       </div>
