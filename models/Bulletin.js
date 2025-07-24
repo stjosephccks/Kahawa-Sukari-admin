@@ -9,5 +9,6 @@ const BulletinScema = new Schema({
         type: [String],
         enum: ["YCA", "YSC", "CJPD", "MATRIMONY", "CHATECHISIS"]
     },
+    published:{type:Boolean, default:false}
 });
 export const Bulletin = models.Bulletin || model('Bulletin', BulletinScema);
