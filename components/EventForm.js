@@ -26,7 +26,7 @@ export default function EventForm({
     const router =useRouter()
     async function saveEvent(ev){   
         ev.preventDefault()
-        const data={title,description,date,venue, images}
+        const data={title,description,date,venue, images,published:published||false}
         if(_id){
            await axios.put('/api/events', {...data,_id})
         }
@@ -126,6 +126,16 @@ function updateImagesOrder(images){
                 <input type="text" value={venue} onChange={ev=>setVenue(ev.target.value)}/>
                 <label>Date of Event</label>
                 <input value={formatDateForInput(date)} onChange={ev=>setDate(ev.target.value)} type="datetime-local"></input>
+                <label className="flex items-center p-2 border rounded-md hover:bg-gray-50 cursor-pointer">
+                <input
+                    type="checkbox"
+                    className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                    checked={published}
+                    onChange={ev => setPublished(ev.target.checked)}
+                />
+                <span className="ml-2 text-sm text-gray-700">Published</span>
+            </label>
+                
                 <button className="btn-primary" type="submit"> Save</button>
 
             </form>
