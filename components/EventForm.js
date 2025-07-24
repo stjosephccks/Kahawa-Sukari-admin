@@ -12,8 +12,7 @@ export default function EventForm({
     description:existingDescription,
     date:existingDate,
     venue:existingVenue,
-    images:existingImages,
-    published:existingPublished
+    images:existingImages
 }){
     const [title,setTitle]=useState(existingTitle||'')
     const [description,setDescription]=useState(existingDescription||'')
@@ -23,12 +22,11 @@ export default function EventForm({
     const [isUploading ,setIsUploading]=useState(false)
     const [venue,setVenue]= useState(existingVenue||'')
     const [loadedImages, setLoadedImages] = useState(Array(images.length).fill(false));
-    const [published, setPublished] = useState(existingPublished);
 
     const router =useRouter()
     async function saveEvent(ev){   
         ev.preventDefault()
-        const data={title,description,date,venue, images,published}
+        const data={title,description,date,venue, images}
         if(_id){
            await axios.put('/api/events', {...data,_id})
         }
@@ -128,10 +126,6 @@ function updateImagesOrder(images){
                 <input type="text" value={venue} onChange={ev=>setVenue(ev.target.value)}/>
                 <label>Date of Event</label>
                 <input value={formatDateForInput(date)} onChange={ev=>setDate(ev.target.value)} type="datetime-local"></input>
-                <label>
-                        <input type="checkbox" checked={published} onChange={ev=>setPublished(ev.target.checked)}></input>
-                    Published
-                </label> 
                 <button className="btn-primary" type="submit"> Save</button>
 
             </form>
