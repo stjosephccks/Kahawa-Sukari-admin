@@ -16,9 +16,9 @@ export default async function handle(req, res){
     }
 
     if(method==='POST'){
-        const {title,content,images,description, sections}= req.body; // Added sections
+        const {title,content,images,description, sections,published}= req.body; // Added sections
        const BulletinDocument= await Bulletin.create({
-            title,content,description,images,sections // Added sections
+            title,content,description,images,sections,published:published||false // Added sections
             
         })
         res.json(BulletinDocument)
@@ -26,8 +26,8 @@ export default async function handle(req, res){
 
     }
     if (method ==='PUT'){
-        const {title,content,description, images, sections, _id}= req.body; // Added sections
-        const updateData = { title,content,description,images };
+        const {title,content,description, images, sections,published, _id}= req.body; // Added sections
+        const updateData = { title,content,description,images,published:!!published };
         if (sections !== undefined) { // Only include sections in update if it's provided
             updateData.sections = sections;
         }
