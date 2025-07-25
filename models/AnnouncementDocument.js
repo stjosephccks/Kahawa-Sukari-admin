@@ -35,6 +35,7 @@ const AnnouncementDocumentSchema = new Schema({
     liturgicalSeason: { type: String, required: false },
     massAnimation: { type: String, required: false },
     occasion: { type: String, required: false },
+    published:{type:Boolean, default:false},
 
     //Mass Schedule
     currentWeekMass: [massScheduleSchema],

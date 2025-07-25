@@ -12,7 +12,8 @@ export default function EventForm({
     description:existingDescription,
     date:existingDate,
     venue:existingVenue,
-    images:existingImages
+    images:existingImages,
+    published:existingPublished
 }){
     const [title,setTitle]=useState(existingTitle||'')
     const [description,setDescription]=useState(existingDescription||'')
@@ -22,11 +23,13 @@ export default function EventForm({
     const [isUploading ,setIsUploading]=useState(false)
     const [venue,setVenue]= useState(existingVenue||'')
     const [loadedImages, setLoadedImages] = useState(Array(images.length).fill(false));
+    const [published, setPublished] = useState(Boolean(existingPublished));
+    
 
     const router =useRouter()
     async function saveEvent(ev){   
         ev.preventDefault()
-        const data={title,description,date,venue, images,published:published||false}
+        const data={title,description,date,venue, images,published:Boolean(published)}
         if(_id){
            await axios.put('/api/events', {...data,_id})
         }
@@ -126,17 +129,47 @@ function updateImagesOrder(images){
                 <input type="text" value={venue} onChange={ev=>setVenue(ev.target.value)}/>
                 <label>Date of Event</label>
                 <input value={formatDateForInput(date)} onChange={ev=>setDate(ev.target.value)} type="datetime-local"></input>
-                <label className="flex items-center p-2 border rounded-md hover:bg-gray-50 cursor-pointer">
-                <input
-                    type="checkbox"
-                    className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                    checked={published}
-                    onChange={ev => setPublished(ev.target.checked)}
-                />
-                <span className="ml-2 text-sm text-gray-700">Published</span>
-            </label>
                 
-                <button className="btn-primary" type="submit"> Save</button>
+            <div className="my-4 p-4 border rounded-md bg-gray-50">
+                <label className="flex items-center cursor-pointer">
+                    <input
+                        type="checkbox"
+                        className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                        checked={published}
+                        onChange={ev => setPublished(ev.target.checked)}
+                    />
+                    <span className="ml-2 text-sm font-medium text-gray-700">
+                        Published
+                    </span>
+                </label>
+                <p className="mt-1 text-xs text-gray-500">
+                    {published 
+                        ? "This Event will be visible to all users" 
+                        : "This Event is saved as draft and not visible to users"
+                    }
+                </p>
+            </div>
+                
+            <div className="flex gap-2">
+                <button 
+                    className="btn-primary py-2" 
+                    type="submit"
+                >
+                    {_id ? 'Update' : 'Create'} Event
+                </button>
+                
+                {/* Optional: Save as Draft button */}
+                <button 
+                    className="btn-secondary py-2" 
+                    type="button"
+                    onClick={(ev) => {
+                        setPublished(false);
+                        saveEvent(ev);
+                    }}
+                >
+                    Save as Draft
+                </button>
+            </div>
 
             </form>
         </>

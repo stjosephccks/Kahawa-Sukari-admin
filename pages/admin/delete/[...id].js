@@ -18,7 +18,7 @@ export default function DeleteAdmin(){
 
     },[id])
     async function deleteAdmin(){
-       await axios.delete('/api/admin?id='+id);
+       await axios.delete('/api/admin', { data: { _id: id } });
        goBack() 
     }
     function goBack(){

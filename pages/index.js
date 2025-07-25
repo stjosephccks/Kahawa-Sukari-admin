@@ -12,12 +12,23 @@ export default function Home() {
   const [events, setEvents] = useState([]);
   useEffect(() => {
     if (status === "authenticated") {
-      axios.get("/api/announcements").then((response) => {
-        setAnnouncements(response.data);
-      });
-      axios.get("/api/events").then((response) => {
-        setEvents(response.data);
-      });
+      const fetchData = async () => {
+        try {
+          // Fetch announcements
+          const announcementsResponse = await axios.get("/api/announcements");
+          setAnnouncements(announcementsResponse.data);
+          
+          // Fetch events
+          const eventsResponse = await axios.get("/api/events");
+          setEvents(eventsResponse.data);
+        } catch (error) {
+          console.error("Error fetching data:", error);
+          // You can add error state and display it to the user if needed
+          // setError("Failed to load data. Please try again later.");
+        }
+      };
+
+      fetchData();
     }
   }, [status]);
   function formatDateForDisplay(date) {

@@ -16,25 +16,45 @@ export default async function handle(req, res){
     }
 
     if(method==='POST'){
-        const {title,content,images,description, sections,published}= req.body; // Added sections
+        const {title,content,images,description, sections,published}= req.body; 
+        console.log('Creating bulletin with published:', published); 
+        // const isPublished = !(published === false || published === 'false' || published === 0 || published === '0')
        const BulletinDocument= await Bulletin.create({
-            title,content,description,images,sections,published:published||false // Added sections
+            title,content,description,images,sections,published:Boolean(published)
             
         })
+        console.log('Created bulletin:', BulletinDocument);
         res.json(BulletinDocument)
 
 
     }
     if (method ==='PUT'){
-        const {title,content,description, images, sections,published, _id}= req.body; // Added sections
-        const updateData = { title,content,description,images,published:!!published };
-        if (sections !== undefined) { // Only include sections in update if it's provided
+        const {title, content, description, images, sections, published, _id} = req.body;
+        
+        const updateData = { 
+            title,
+            content,
+            description,
+            images,
+            published: Boolean(published)
+        };
+        
+        if (sections !== undefined) {
             updateData.sections = sections;
         }
-        await Bulletin.updateOne({_id}, updateData);
-        res.json(true)
-
-
+        
+        const result = await Bulletin.findOneAndUpdate(
+            { _id },
+            { $set: updateData },
+            { new: true, runValidators: true }
+        );
+        
+        if (!result) {
+            return res.status(404).json({ error: 'Bulletin not found' });
+        }
+        
+        res.json(result);
+        return;
     }
   
     if(method==='DELETE'){

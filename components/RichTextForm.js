@@ -27,23 +27,33 @@ export default function RichText({
     const [description, setDescription] = useState(existingDescription || '')
     const [loadedImages, setLoadedImages] = useState(Array(images.length).fill(false));
     const [sections, setSections] = useState(existingSections || []);
-    const [published, setPublished] = useState(existingPublished);
+    const [published, setPublished] = useState(Boolean(existingPublished));
 
     async function saveBulletin(ev) {
-        ev.preventDefault()
-        const data = { title, content, description, images,published:published||false, sections: formType === 'bulletin' ? sections : undefined }
-        // Only include sections if formType is bulletin
-        if (_id) {
-            await axios.put('/api/bulletin', { ...data, _id })
+        ev.preventDefault();
+        const data = { 
+            title, 
+            content, 
+            description, 
+            images,
+            published: Boolean(published),  // Directly use the published state
+            sections: formType === 'bulletin' ? sections : undefined 
+        };
+        
+        console.log('Saving bulletin with data:', data);
+        
+        try {
+            if (_id) {
+                const response = await axios.put('/api/bulletin', { ...data, _id });
+                console.log('Update response:', response.data);
+            } else {
+                const response = await axios.post('/api/bulletin', data);
+                console.log('Create response:', response.data);
+            }
+            setgoToBulletins(true);
+        } catch (error) {
+            console.error('Error saving bulletin:', error);
         }
-        else {
-            await axios.post('/api/bulletin', data)
-        }
-
-        setgoToBulletins(true)
-
-
-
     }
     const router = useRouter()
 
@@ -154,20 +164,46 @@ export default function RichText({
 
             <RichTextEditor onEditorStateChange={handleEditorStateChange} initialContent={existingContent} />
 
-            <label className="flex items-center p-2 border rounded-md hover:bg-gray-50 cursor-pointer">
-                <input
-                    type="checkbox"
-                    className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                    checked={published}
-                    onChange={ev => setPublished(ev.target.checked)}
-                />
-                <span className="ml-2 text-sm text-gray-700">Published</span>
-            </label>
+            <div className="my-4 p-4 border rounded-md bg-gray-50">
+                <label className="flex items-center cursor-pointer">
+                    <input
+                        type="checkbox"
+                        className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                        checked={published}
+                        onChange={ev => setPublished(ev.target.checked)}
+                    />
+                    <span className="ml-2 text-sm font-medium text-gray-700">
+                        Published
+                    </span>
+                </label>
+                <p className="mt-1 text-xs text-gray-500">
+                    {published 
+                        ? "This bulletin will be visible to all users" 
+                        : "This bulletin is saved as draft and not visible to users"
+                    }
+                </p>
+            </div>
 
-
-            <button className="btn-primary py-2 " type="submit">Save</button>
-
-
+            <div className="flex gap-2">
+                <button 
+                    className="btn-primary py-2" 
+                    type="submit"
+                >
+                    {_id ? 'Update' : 'Create'} Bulletin
+                </button>
+                
+                {/* Optional: Save as Draft button */}
+                <button 
+                    className="btn-secondary py-2" 
+                    type="button"
+                    onClick={(ev) => {
+                        setPublished(false);
+                        saveBulletin(ev);
+                    }}
+                >
+                    Save as Draft
+                </button>
+            </div>
         </form>
 
     )
