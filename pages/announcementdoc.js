@@ -17,6 +17,7 @@ export default function AnnouncementDoc() {
     announcements: false,
     documents: false
   });
+  const [publish, setPublish] = useState(false);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -63,6 +64,7 @@ export default function AnnouncementDoc() {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('originalFileName', file.name);
+      formData.append('published', publish); // Add publish status to form data
 
       await axios.post('/api/announcemet-docs', formData, {
         headers: {
@@ -123,6 +125,28 @@ export default function AnnouncementDoc() {
       await fetchDocuments();
     } catch (err) {
       setError(`Failed to update document: ${err.message}`);
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const togglePublishStatus = async (docId, currentStatus) => {
+    try {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append('_id', docId);
+      formData.append('published', (!currentStatus).toString());
+
+      await axios.put('/api/announcemet-docs', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
+      await fetchDocuments(); // Refresh the documents list
+    } catch (err) {
+      setError('Failed to update document status');
       console.error(err);
     } finally {
       setLoading(false);
@@ -266,39 +290,31 @@ export default function AnnouncementDoc() {
                             </div>
                           </div>
                           <div className="flex items-center space-x-3">
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center space-x-2 ${doc.processingStatus === 'parsed' ? 'bg-green-100 text-green-800' :
-                              doc.processingStatus === 'error' ? 'bg-red-100 text-red-800' :
-                                'bg-yellow-100 text-yellow-800'
-                              }`}>
-                              {doc.processingStatus === 'processing' && (
-                                <svg className="animate-spin h-4 w-4 text-yellow-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                              )}
-                              <span>{doc.processingStatus.charAt(0).toUpperCase() + doc.processingStatus.slice(1)}</span>
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              doc.published 
+                                ? 'bg-green-100 text-green-800' 
+                                : 'bg-yellow-100 text-yellow-800'
+                            }`}>
+                              {doc.published ? 'Published' : 'Draft'}
                             </span>
-                            <div className="flex space-x-2">
-                              <label className="cursor-pointer bg-blue-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors">
-                                <input
-                                  type="file"
-                                  className="hidden"
-                                  accept=".docx,.doc"
-                                  onChange={(e) => {
-                                    if (e.target.files?.[0]) {
-                                      handleUpdateDocument(doc._id, e.target.files[0]);
-                                    }
-                                  }}
-                                />
-                                <Edit className="w-4 h-4" />
-                              </label>
-                              <button
-                                onClick={() => deleteDocument(doc._id)}
-                                className="bg-red-600 text-white px-3 py-2 rounded-lg text-sm hover:bg-red-700 transition-colors"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
+                            <button
+                              onClick={() => togglePublishStatus(doc._id, doc.published)}
+                              className={`px-3 py-1 rounded text-sm ${
+                                doc.published
+                                  ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
+                                  : 'bg-green-100 text-green-700 hover:bg-green-200'
+                              }`}
+                              disabled={loading}
+                            >
+                              {doc.published ? 'Unpublish' : 'Publish'}
+                            </button>
+                            <button
+                              onClick={() => deleteDocument(doc._id)}
+                              className="px-3 py-1 bg-red-100 text-red-700 rounded text-sm hover:bg-red-200"
+                              disabled={loading}
+                            >
+                              Delete
+                            </button>
                           </div>
                         </div>
                       ))}

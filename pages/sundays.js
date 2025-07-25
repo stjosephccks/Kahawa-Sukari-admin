@@ -66,7 +66,7 @@ function SundayPage({swal}){
     }
     return(
         <Layout>
-            <h1>Sunday</h1>
+            <h1>Day of the Week</h1>
               <form onSubmit={saveSunday}>
             <label>{editedSunday ? `Edit Week ${editedSunday.sunday}`:'Add New Week'} </label>
             <div className="flex">
@@ -80,7 +80,7 @@ function SundayPage({swal}){
             <table className="basic mt-4 ">
                 <thead>
                     <tr>
-                        <td>Sundays</td>
+                        <td>Day</td>
                         <td></td>
                     </tr>
                 </thead>

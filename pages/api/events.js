@@ -15,7 +15,7 @@ export default async function handle(req, res){
      res.json(await Event.find())
         }   
     }
-
+ 
 
     if(method==='POST'){
         const {title,description,date,venue,images,published}= req.body

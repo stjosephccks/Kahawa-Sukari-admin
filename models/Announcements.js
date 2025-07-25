@@ -5,6 +5,7 @@ const AnnouncementSchema = new Schema({
   description: { type: String, required: true },
   sunday: { type: mongoose.Types.ObjectId, ref: "Sunday" },
   massScheduleAssignments: [{ name: String, time: String }],
+  published:{type:Boolean, default:false, required:true}
 });
 
 export const Announcement =

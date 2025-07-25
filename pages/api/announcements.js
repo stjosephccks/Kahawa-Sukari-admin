@@ -18,7 +18,7 @@ export default async function handle(req, res) {
 
   if (method === "POST") {
     console.log("Received POST data:", req.body); // Log the received payload
-    const { title, description, sunday, massScheduleAssignments } = req.body;
+    const { title, description, sunday, massScheduleAssignments, published } = req.body;
 
     try {
       const AnnouncementDocument = await Announcement.create({
@@ -26,6 +26,7 @@ export default async function handle(req, res) {
         description,
         sunday,
         massScheduleAssignments,
+        published:Boolean(published)
       });
       res.json(AnnouncementDocument);
     } catch (error) {
@@ -35,7 +36,7 @@ export default async function handle(req, res) {
   }
 
   if (method === "PUT") {
-    const { title, description, sunday, massScheduleAssignments, _id } =
+    const { title, description, sunday, massScheduleAssignments,published, _id } =
       req.body;
     await Announcement.updateOne(
       { _id },
@@ -44,6 +45,7 @@ export default async function handle(req, res) {
         description,
         sunday,
         massScheduleAssignments,
+        published:Boolean(published)
       }
     );
     res.json(true);

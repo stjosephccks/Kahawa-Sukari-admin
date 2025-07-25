@@ -9,6 +9,7 @@ export default function AnnouncementForm({
   description: existingDescription,
   sunday: assignedSunday,
   massScheduleAssignments: existingMassScheduleAssignments,
+  published: existingPublished,
 }) {
   const [sundays, setSundays] = useState([]);
   const [title, setTitle] = useState(existingTitle || "");
@@ -20,12 +21,14 @@ export default function AnnouncementForm({
   );
   const [newAssignmentName, setNewAssignmentName] = useState("");
   const [newAssignmentTime, setNewAssignmentTime] = useState("");
+  const [published, setPublished] = useState(Boolean(existingPublished));
+
 
   const router = useRouter();
 
   async function saveAnnouncement(ev) {
     ev.preventDefault();
-    const data = { title, description, sunday, massScheduleAssignments };
+    const data = { title, description, sunday, massScheduleAssignments, published:Boolean(published) };
     console.log("Payload before sending:", JSON.stringify(data, null, 2));
 
     try {
@@ -83,13 +86,13 @@ export default function AnnouncementForm({
 
   return (
     <form onSubmit={saveAnnouncement}>
-      <label>Sunday</label>
+      <label>Day of the week</label>
       <select
         className="mb-0"
         value={sunday}
         onChange={(ev) => setSunday(ev.target.value)}
       >
-        <option value="0"> No Sunday Selected</option>
+        <option value="0"> No Day Selected</option>
         {sundays.length > 0 &&
           sundays.map((sunday) => (
             <option key={sunday._id} value={sunday._id}>
@@ -114,7 +117,7 @@ export default function AnnouncementForm({
         rows={15}
       ></textarea>
 
-      <label>Mass Schedule Assignments</label>
+      <label> Schedule of the Notice</label>
       <div>
         {massScheduleAssignments.map((assignment, index) => (
           <div key={index} className="assignment-item flex items-center mb-2">
@@ -153,14 +156,14 @@ export default function AnnouncementForm({
           type="text"
           value={newAssignmentName}
           onChange={(ev) => setNewAssignmentName(ev.target.value)}
-          placeholder="Jumuiya Name"
+          placeholder="Group"
           className="border p-1"
         />
         <input
           type="text"
           value={newAssignmentTime}
           onChange={(ev) => setNewAssignmentTime(ev.target.value)}
-          placeholder="Mass Time"
+          placeholder=" Time"
           className="border p-1"
         />
         <button
@@ -170,11 +173,59 @@ export default function AnnouncementForm({
         >
           Add Assignment
         </button>
+
+        <div></div>
+
+        <div className="my-4 p-4 border rounded-md bg-gray-50">
+          <label className="flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+              checked={published}
+              onChange={ev => setPublished(ev.target.checked)}
+            />
+            <span className="ml-2 text-sm font-medium text-gray-700">
+              Published
+            </span>
+          </label>
+          <p className="mt-1 text-xs text-gray-500">
+            {published
+              ? "This Notice will be visible to all users"
+              : "This Notice is saved as draft and not visible to users"
+            }
+          </p>
+        </div>
+
+
+
+
+
       </div>
 
-      <button type="submit" className="btn-primary">
+      <div className="flex gap-2">
+        <button
+          className="btn-primary py-2"
+          type="submit"
+        >
+          {_id ? 'Update' : 'Create'} Notice
+        </button>
+
+        {/* Optional: Save as Draft button */}
+        <button
+          className="btn-secondary py-2"
+          type="button"
+          onClick={(ev) => {
+            setPublished(false);
+            saveAnnouncement(ev);
+          }}
+        >
+          Save as Draft
+        </button>
+      </div>
+
+      {/* <button type="submit" className="btn-primary">
         Save
-      </button>
+      </button> */}
     </form>
   );
 }

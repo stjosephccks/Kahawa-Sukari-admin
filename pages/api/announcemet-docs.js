@@ -44,10 +44,9 @@ export default async function handle(req, res) {
             const [fields, files] = await form.parse(req);
             const file = files.file?.[0];
             const originalFileName = fields.originalFileName?.[0];
+            const published = fields.published?.[0] === 'true';
 
             if (!originalFileName || !file) {
-
-
                 return res.status(400).json({ error: 'Both file and originalFileName are required' });
             }
 
@@ -78,7 +77,8 @@ export default async function handle(req, res) {
                 liturgicalSeason: parsedData.liturgicalSeason || '',
                 massAnimation: parsedData.massAnimation || '',
                 nextWeekDate: parsedData.nextWeekDate || null,
-                nextWeekOccasion: parsedData.nextWeekOccasion || ''
+                nextWeekOccasion: parsedData.nextWeekOccasion || '',
+                published: published || false  // Ensure false if published is undefined
             };
 
             console.log('\n[API] Data being saved to database:', JSON.stringify(dataToSave, null, 2));
@@ -100,31 +100,24 @@ export default async function handle(req, res) {
 
     if (method === 'PUT') {
         try {
-            const { _id, file, originalFileName } = req.body;
+            const form = formidable({});
+            const [fields] = await form.parse(req);
+            
+            const _id = fields._id?.[0];
+            const published = fields.published?.[0] === 'true';
 
-            // Update processing status
+            if (!_id) {
+                return res.status(400).json({ error: 'Document ID is required' });
+            }
+
+            const updateData = { published };
+            
             await AnnouncementDocument.updateOne(
                 { _id },
-                { processingStatus: 'processing' }
+                { $set: updateData }
             );
 
-            // Parse the new document
-            const parsedData = await ChurchDocumentParser.parseDocx(file);
-
-            // Update the document with new parsed data
-            await AnnouncementDocument.updateOne(
-                { _id },
-                {
-                    ...parsedData,
-                    originalFileName,
-                    processingStatus: 'parsed',
-                    awsS3Key: file.key,
-                    fileUrl: file.url,
-                }
-            );
-
-            const updatedDoc = await AnnouncementDocument.findById(_id);
-            res.json(updatedDoc);
+            res.json({ success: true });
         } catch (error) {
             console.error('Error updating document:', error);
             res.status(500).json({ error: error.message });

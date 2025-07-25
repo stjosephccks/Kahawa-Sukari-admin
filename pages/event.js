@@ -28,7 +28,7 @@ export default function Events() {
   function formatDateForDisplay(date) {
     return date ? format(new Date(date), "MMMM d, yyyy - h:mm a") : '';
   }
-
+  
   return (
     <Layout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
