@@ -28,13 +28,19 @@ export default function Bulletin(){
 
     return(
         <Layout>
-            <Link className="btn-primary" href={'/bulletin/new'}>Add New Bulletin</Link>
-            <table className="basic mt-2">
-                <thead>
+             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">Bulletins</h1>
+            <Link className=" inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition" href={'/bulletin/new'}>Add New Bulletin</Link>
+            </div>
+            <div className="overflow-x-auto border border-gray-200 rounded-lg shadow-sm">
+
+            <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
                     <tr>
-                        <td>Bulletins</td>
-                        <td>Status</td>
-                        <td>Actions</td>
+                        <th className="px-6 py-3 text-left text-sm font-medium text-gray-900">Bulletins</th>
+                        <th className="px-6 py-3 text-left text-sm font-medium text-gray-900">Status</th>
+                        <th className="px-6 py-3 text-left text-sm font-medium text-gray-900">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -96,6 +102,8 @@ export default function Bulletin(){
                     ))}
                 </tbody>
             </table>
+            </div>
+            </div>
         </Layout>
     )
 }

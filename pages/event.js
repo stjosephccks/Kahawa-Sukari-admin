@@ -3,7 +3,7 @@ import axios from "axios";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { format } from 'date-fns';
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/hooks/useAuth";   
 
 export default function Events() {
   const [events, setEvents] = useState([]);
