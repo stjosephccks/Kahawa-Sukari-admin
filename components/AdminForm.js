@@ -45,8 +45,12 @@ export default function AdminForm({
     
     try {
       const data = { name, email, role };
-      // Only include password if it's a new admin or being updated
-      if (!_id || password) {
+      // Only include password if it's a new admin or being explicitly updated
+      if (!_id) {
+        // For new admin, password is required
+        data.password = password;
+      } else if (password && password !== existingPassword) {
+        // For existing admin, only include password if it's changed
         data.password = password;
       }
 
@@ -57,12 +61,10 @@ export default function AdminForm({
         await axios.post("/api/admin", data);
         setSuccess("Admin created successfully!");
         // Clear form after successful creation
-        if (!_id) {
-          setName("");
-          setEmail("");
-          setPassword("");
-          setRole(ROLES.EDITOR);
-        }
+        setName("");
+        setEmail("");
+        setPassword("");
+        setRole(ROLES.EDITOR);
       }
       
       // Redirect to admin list after a short delay

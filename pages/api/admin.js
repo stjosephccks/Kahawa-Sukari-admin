@@ -62,9 +62,15 @@ export default async function handle(req, res) {
       if (!_id) {
         return res.status(400).json({ error: "Missing admin ID" });
       }
-      if (data.password) {
+      
+      // Only hash and update password if a new one is provided
+      if (data.password && data.password.trim() !== '') {
         data.password = await bcrypt.hash(data.password, 10);
+      } else {
+        // Remove password from update data if it's empty
+        delete data.password;
       }
+      
       const admin = await AdminEmail.findByIdAndUpdate(_id, data, { new: true });
       return res.json(admin || { error: "Admin not found" });
     }
