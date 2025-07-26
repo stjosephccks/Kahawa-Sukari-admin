@@ -60,7 +60,7 @@ export const authOptions = {
             throw new Error("Invalid password");
           }
 
-          return { id: admin._id, email: admin.email, name: admin.name }; // Return user object
+          return { id: admin._id, email: admin.email, name: admin.name, role: admin.role || "editor" }; // Return user object
         } catch (error) {
           console.error(error);
           throw new Error("Authentication failed");
@@ -75,6 +75,7 @@ export const authOptions = {
         session.user.id = token.sub; // This ensures the user id is part of the session
         session.user.email = token.email;
         session.user.name = token.name;
+        session.user.role = token.role;
       }
       return session;
     },
@@ -83,6 +84,7 @@ export const authOptions = {
         token.sub = user.id; // Set the user id in the token
         token.email = user.email;
         token.name = user.name;
+        token.role = user.role;
       }
       return token;
     },

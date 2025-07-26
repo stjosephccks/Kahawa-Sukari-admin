@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import Spinner from "./Spinner";
 import Image from "next/image";
 import {ReactSortable} from 'react-sortablejs'
+import { useAuth } from "@/hooks/useAuth";
 
 export default function EventForm({
     _id,
@@ -24,6 +25,7 @@ export default function EventForm({
     const [venue,setVenue]= useState(existingVenue||'')
     const [loadedImages, setLoadedImages] = useState(Array(images.length).fill(false));
     const [published, setPublished] = useState(Boolean(existingPublished));
+    const { canPublish } = useAuth();
     
 
     const router =useRouter()
@@ -130,6 +132,8 @@ function updateImagesOrder(images){
                 <label>Date of Event</label>
                 <input value={formatDateForInput(date)} onChange={ev=>setDate(ev.target.value)} type="datetime-local"></input>
                 
+            
+            {canPublish && (
             <div className="my-4 p-4 border rounded-md bg-gray-50">
                 <label className="flex items-center cursor-pointer">
                     <input
@@ -149,6 +153,7 @@ function updateImagesOrder(images){
                     }
                 </p>
             </div>
+            )}
                 
             <div className="flex gap-2">
                 <button 
@@ -158,7 +163,7 @@ function updateImagesOrder(images){
                     {_id ? 'Update' : 'Create'} Event
                 </button>
                 
-                {/* Optional: Save as Draft button */}
+                {canPublish && (
                 <button 
                     className="btn-secondary py-2" 
                     type="button"
@@ -169,6 +174,7 @@ function updateImagesOrder(images){
                 >
                     Save as Draft
                 </button>
+            )}
             </div>
 
             </form>

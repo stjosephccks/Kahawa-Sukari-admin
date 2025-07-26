@@ -4,6 +4,7 @@ import { AnnouncementDocument } from "@/models/AnnouncementDocument";
 import ChurchDocumentParser from "@/lib/utils/documentParser";
 import formidable from 'formidable';
 import { uploadToS3, getFileFromS3 } from '@/lib/aws-config';
+import { requirePermissions } from "@/lib/auth";
 
 export const config = {
     api: {
@@ -26,7 +27,7 @@ export default async function handle(req, res) {
 
     if (method === 'POST') {
         try {
-            // Check if there's already a document   s being processed
+          
             const existingDoc = await AnnouncementDocument.findOne({
                 processingStatus: { $in: ['uploaded', 'processing'] }
             });
@@ -99,6 +100,7 @@ export default async function handle(req, res) {
     }
 
     if (method === 'PUT') {
+    
         try {
             const form = formidable({});
             const [fields] = await form.parse(req);
@@ -125,6 +127,7 @@ export default async function handle(req, res) {
     }
 
     if (method === 'DELETE') {
+        
         try {
             if (req.query?.id) {
                 const doc = await AnnouncementDocument.findById(req.query.id);

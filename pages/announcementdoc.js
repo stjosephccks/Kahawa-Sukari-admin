@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Upload, Calendar, Users, Bell, FileText, ChevronDown, ChevronUp, X, Trash2, Edit } from 'lucide-react';
 import Layout from '@/components/Layout';
 import axios from 'axios';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function AnnouncementDoc() {
   const [documents, setDocuments] = useState([]);
@@ -18,6 +19,7 @@ export default function AnnouncementDoc() {
     documents: false
   });
   const [publish, setPublish] = useState(false);
+  const { canPublish, canDelete } = useAuth();
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -297,6 +299,7 @@ export default function AnnouncementDoc() {
                             }`}>
                               {doc.published ? 'Published' : 'Draft'}
                             </span>
+                            {canPublish && (
                             <button
                               onClick={() => togglePublishStatus(doc._id, doc.published)}
                               className={`px-3 py-1 rounded text-sm ${
@@ -308,6 +311,8 @@ export default function AnnouncementDoc() {
                             >
                               {doc.published ? 'Unpublish' : 'Publish'}
                             </button>
+                            )}
+                              {canDelete && (
                             <button
                               onClick={() => deleteDocument(doc._id)}
                               className="px-3 py-1 bg-red-100 text-red-700 rounded text-sm hover:bg-red-200"
@@ -315,6 +320,7 @@ export default function AnnouncementDoc() {
                             >
                               Delete
                             </button>
+                            )}
                           </div>
                         </div>
                       ))}

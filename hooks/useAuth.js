@@ -16,7 +16,7 @@ export function useAuth() {
    */
   const hasPermission = (permission) => {
     if (!user?.role) return false;
-    if (user.role === ROLES.SUPER_ADMIN) return true;
+    if (user.role === 'super_admin') return true;
     return ROLE_PERMISSIONS[user.role]?.includes(permission) || false;
   };
 

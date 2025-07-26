@@ -5,6 +5,7 @@ import { convertToRaw } from "draft-js";
 import { useRouter } from "next/router.js";
 import Spinner from "./Spinner.js";
 import Image from "next/image.js";
+import { useAuth } from "@/hooks/useAuth";
 
 const BULLETIN_SECTIONS = ["YCA", "YSC", "CJPD", "MATRIMONY", "CHATECHISIS"];
 
@@ -28,6 +29,7 @@ export default function RichText({
     const [loadedImages, setLoadedImages] = useState(Array(images.length).fill(false));
     const [sections, setSections] = useState(existingSections || []);
     const [published, setPublished] = useState(Boolean(existingPublished));
+    const { canPublish } = useAuth();
 
     async function saveBulletin(ev) {
         ev.preventDefault();
@@ -164,6 +166,7 @@ export default function RichText({
 
             <RichTextEditor onEditorStateChange={handleEditorStateChange} initialContent={existingContent} />
 
+            {canPublish && (
             <div className="my-4 p-4 border rounded-md bg-gray-50">
                 <label className="flex items-center cursor-pointer">
                     <input
@@ -183,7 +186,7 @@ export default function RichText({
                     }
                 </p>
             </div>
-
+            )}
             <div className="flex gap-2">
                 <button 
                     className="btn-primary py-2" 
@@ -192,7 +195,7 @@ export default function RichText({
                     {_id ? 'Update' : 'Create'} Bulletin
                 </button>
                 
-                {/* Optional: Save as Draft button */}
+               {canPublish && (
                 <button 
                     className="btn-secondary py-2" 
                     type="button"
@@ -203,6 +206,7 @@ export default function RichText({
                 >
                     Save as Draft
                 </button>
+            )}
             </div>
         </form>
 

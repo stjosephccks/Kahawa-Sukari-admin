@@ -3,9 +3,11 @@ import axios from "axios";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { format } from 'date-fns';
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Events() {
   const [events, setEvents] = useState([]);
+  const { canPublish, canDelete } = useAuth();
 
   useEffect(() => {
     loadEvents();
@@ -93,6 +95,7 @@ export default function Events() {
                       </svg>
                       Edit
                     </Link>
+                    {canPublish && (
                     <button
                       onClick={() => togglePublish(event._id, event.published)}
                       className={`inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-md transition ${
@@ -117,6 +120,8 @@ export default function Events() {
                       </svg>
                       {event.published ? 'Unpublish' : 'Publish'}
                     </button>
+                    )}
+                    {canDelete && (
                     <Link
                       href={`/events/delete/${event._id}`}
                       className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-600 hover:text-red-800 transition"
@@ -137,6 +142,7 @@ export default function Events() {
                       </svg>
                       Delete
                     </Link>
+                    )}
                   </td>
                 </tr>
               ))}

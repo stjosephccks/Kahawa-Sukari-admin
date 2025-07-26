@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { Announcement } from "../../models/Announcements";
 import { mongooseConnect } from "../../lib/mongoose";
 import { authOptions, isAdminRequest } from "./auth/[...nextauth]";
+import { requirePermissions } from "@/lib/apiPermissions";
 
 export default async function handle(req, res) {
   const { method } = req;
@@ -17,6 +18,7 @@ export default async function handle(req, res) {
   }
 
   if (method === "POST") {
+    
     console.log("Received POST data:", req.body); // Log the received payload
     const { title, description, sunday, massScheduleAssignments, published } = req.body;
 
@@ -26,7 +28,7 @@ export default async function handle(req, res) {
         description,
         sunday,
         massScheduleAssignments,
-        published:Boolean(published)
+        published: Boolean(published)
       });
       res.json(AnnouncementDocument);
     } catch (error) {
@@ -36,7 +38,8 @@ export default async function handle(req, res) {
   }
 
   if (method === "PUT") {
-    const { title, description, sunday, massScheduleAssignments,published, _id } =
+    
+    const { title, description, sunday, massScheduleAssignments, published, _id } =
       req.body;
     await Announcement.updateOne(
       { _id },
@@ -45,10 +48,10 @@ export default async function handle(req, res) {
         description,
         sunday,
         massScheduleAssignments,
-        published:Boolean(published)
+        published: Boolean(published)
       }
     );
-    res.json(true);
+    res.json(true)
   }
 
   if (method === "DELETE") {

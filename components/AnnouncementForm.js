@@ -2,6 +2,7 @@ import Layout from "@/components/Layout";
 import axios from "axios";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function AnnouncementForm({
   _id,
@@ -23,7 +24,7 @@ export default function AnnouncementForm({
   const [newAssignmentTime, setNewAssignmentTime] = useState("");
   const [published, setPublished] = useState(Boolean(existingPublished));
 
-
+  const { canPublish } = useAuth();
   const router = useRouter();
 
   async function saveAnnouncement(ev) {
@@ -176,6 +177,7 @@ export default function AnnouncementForm({
 
         <div></div>
 
+        {canPublish && (
         <div className="my-4 p-4 border rounded-md bg-gray-50">
           <label className="flex items-center cursor-pointer">
             <input
@@ -195,6 +197,7 @@ export default function AnnouncementForm({
             }
           </p>
         </div>
+        )}
 
 
 
@@ -211,6 +214,7 @@ export default function AnnouncementForm({
         </button>
 
         {/* Optional: Save as Draft button */}
+        {canPublish && (
         <button
           className="btn-secondary py-2"
           type="button"
@@ -221,6 +225,7 @@ export default function AnnouncementForm({
         >
           Save as Draft
         </button>
+        )}
       </div>
 
       {/* <button type="submit" className="btn-primary">
