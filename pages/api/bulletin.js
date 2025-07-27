@@ -17,8 +17,7 @@ export default async function handle(req, res) {
     }
 
     if (method === 'POST') {
-        const check = await requirePermissions(['edit'])(req, res, () => { });
-        if (!check) return;
+       
         const { title, content, images, description, sections, published } = req.body;
         console.log('Creating bulletin with published:', published);
         // const isPublished = !(published === false || published === 'false' || published === 0 || published === '0')
