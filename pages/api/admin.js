@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { AdminEmail, ROLES } from "@/models/Admin";
 import { authOptions } from "./auth/[...nextauth]";
 import { mongooseConnect } from "@/lib/mongoose";
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcryptjs'
 async function hasPermission(req, res) {
   const session = await getServerSession(req, res, authOptions);
   if (!session?.user) {

@@ -3,7 +3,7 @@ import { MongoDBAdapter } from "@auth/mongodb-adapter";
 import NextAuth, { getServerSession } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials"; // Add this import
-import bcrypt from "bcrypt"; // For password encryption
+import bcrypt from "bcryptjs"; // For password encryption
 import { AdminEmail } from "@/models/Admin";
 
 let adminEmails = [];
