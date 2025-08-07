@@ -145,7 +145,7 @@ export default function AnnouncementDoc() {
           'Content-Type': 'multipart/form-data'
         }
       });
-      
+
       await fetchDocuments(); // Refresh the documents list
     } catch (err) {
       setError('Failed to update document status');
@@ -292,34 +292,32 @@ export default function AnnouncementDoc() {
                             </div>
                           </div>
                           <div className="flex items-center space-x-3">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              doc.published 
-                                ? 'bg-green-100 text-green-800' 
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${doc.published
+                                ? 'bg-green-100 text-green-800'
                                 : 'bg-yellow-100 text-yellow-800'
-                            }`}>
+                              }`}>
                               {doc.published ? 'Published' : 'Draft'}
                             </span>
                             {canPublish && (
-                            <button
-                              onClick={() => togglePublishStatus(doc._id, doc.published)}
-                              className={`px-3 py-1 rounded text-sm ${
-                                doc.published
-                                  ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
-                                  : 'bg-green-100 text-green-700 hover:bg-green-200'
-                              }`}
-                              disabled={loading}
-                            >
-                              {doc.published ? 'Unpublish' : 'Publish'}
-                            </button>
+                              <button
+                                onClick={() => togglePublishStatus(doc._id, doc.published)}
+                                className={`px-3 py-1 rounded text-sm ${doc.published
+                                    ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
+                                    : 'bg-green-100 text-green-700 hover:bg-green-200'
+                                  }`}
+                                disabled={loading}
+                              >
+                                {doc.published ? 'Unpublish' : 'Publish'}
+                              </button>
                             )}
-                              {canDelete && (
-                            <button
-                              onClick={() => deleteDocument(doc._id)}
-                              className="px-3 py-1 bg-red-100 text-red-700 rounded text-sm hover:bg-red-200"
-                              disabled={loading}
-                            >
-                              Delete
-                            </button>
+                            {canDelete && (
+                              <button
+                                onClick={() => deleteDocument(doc._id)}
+                                className="px-3 py-1 bg-red-100 text-red-700 rounded text-sm hover:bg-red-200"
+                                disabled={loading}
+                              >
+                                Delete
+                              </button>
                             )}
                           </div>
                         </div>
@@ -464,21 +462,77 @@ export default function AnnouncementDoc() {
                       {activeSection === 'matrimony' && (
                         <div className="space-y-4">
                           {(currentDoc?.matrimonyNotices || []).length > 0 ? (
-                            currentDoc.matrimonyNotices.map((notice, index) => (
-                              <div key={notice._id || index} className="bg-white border rounded-lg p-6">
-                                <div className="mb-2 text-center">
-                                  <h4 className="font-bold text-lg text-pink-900">{notice.groomName}</h4>
-                                  <p className="text-pink-700 text-sm">Son of {notice.groomParents}</p>
-                                  <div className="text-pink-800 font-medium my-2">❤️ & ❤️</div>
-                                  <h4 className="font-bold text-lg text-pink-900">{notice.brideName}</h4>
-                                  <p className="text-pink-700 text-sm">Daughter of {notice.brideParents}</p>
+                            currentDoc.matrimonyNotices.map((notice, index) => {
+                              // Determine bann type display text and color
+                              const getBannTypeInfo = (bannType) => {
+                                switch (bannType) {
+                                  case 'I':
+                                    return { text: '1st Banns', color: 'bg-blue-100 text-blue-800 border-blue-200' };
+                                  case 'II':
+                                    return { text: '2nd Banns', color: 'bg-purple-100 text-purple-800 border-purple-200' };
+                                  case 'III':
+                                    return { text: '3rd Banns', color: 'bg-pink-100 text-pink-800 border-pink-200' };
+                                  default:
+                                    return { text: 'Banns', color: 'bg-gray-100 text-gray-800 border-gray-200' };
+                                }
+                              };
+
+                              const bannInfo = getBannTypeInfo(notice.bannType || 'I');
+                              const isGroupWedding = notice.couples && notice.couples.length > 0;
+
+
+                              return (
+                                <div key={notice._id || index} className="bg-white border rounded-lg p-6 relative">
+                                  {/* Bann Type Badge */}
+                                  <div className={`absolute -top-3 -right-3 px-3 py-1 rounded-full text-xs font-medium border ${bannInfo.color}`}>
+                                    {bannInfo.text}
+                                  </div>
+
+                                  {/* Group Wedding Indicator */}
+                                  {isGroupWedding ? (
+                                    // Group Wedding Display
+                                    <div>
+                                      <h3 className="text-lg font-bold text-center text-green-700 mb-4">Group Wedding</h3>
+                                      <div className="space-y-6">
+                                        {notice.couples.map((couple, idx) => (
+                                          <div key={couple._id || idx} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                                            <div className="text-center mb-2">
+                                              <h4 className="font-bold text-pink-900">{couple.groomName}</h4>
+                                              <div className="text-pink-800 font-medium my-1">❤️ & ❤️</div>
+                                              <h4 className="font-bold text-pink-900">{couple.brideName}</h4>
+                                            </div>
+                                            {/* <div className="mt-2 text-center text-sm text-gray-600">
+                                              <p>Date: {notice.weddingDate ? new Date(notice.weddingDate).toLocaleDateString() : '—'}</p>
+                                              <p>Venue: {notice.venue || 'Our Parish'}</p>
+                                            </div> */}
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    // Individual Wedding Display
+                                    <div className="text-center">
+                                      <h4 className="font-bold text-lg text-pink-900">{notice.groomName}</h4>
+                                      {notice.groomParents && (
+                                        <p className="text-pink-700 text-sm">Son of {notice.groomParents}</p>
+                                      )}
+                                      <div className="text-pink-800 font-medium my-2">❤️ & ❤️</div>
+                                      <h4 className="font-bold text-lg text-pink-900">{notice.brideName}</h4>
+                                      {notice.brideParents && (
+                                        <p className="text-pink-700 text-sm">Daughter of {notice.brideParents}</p>
+                                      )}
+                                    </div>
+                                  )}
+
+                                  <div className="border-t border-pink-200 pt-3 text-center">
+                                    <p className="text-pink-800 font-medium">
+                                      Wedding Date: {notice.weddingDate ? new Date(notice.weddingDate).toLocaleDateString() : '—'}
+                                    </p>
+                                    <p className="text-pink-700 text-sm">{notice.venue || 'Venue to be announced'}</p>
+                                  </div>
                                 </div>
-                                <div className="border-t border-pink-200 pt-3 text-center">
-                                  <p className="text-pink-800 font-medium">Wedding Date: {notice.weddingDate ? new Date(notice.weddingDate).toLocaleDateString() : '—'}</p>
-                                  <p className="text-pink-700 text-sm">{notice.venue}</p>
-                                </div>
-                              </div>
-                            ))
+                              );
+                            })
                           ) : (
                             <p className="text-gray-500 text-center py-8">No matrimony notices available</p>
                           )}
