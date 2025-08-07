@@ -19,12 +19,21 @@ const listAnnouncementsSchema = new Schema({
 
 });
 const matrimonyNoticeSchema = new Schema({
+    bannType: { 
+        type: String, 
+        enum: ['I', 'II', 'III'], 
+        required: false 
+    },
     groomName: { type: String, required: false },
     groomParents: { type: String, required: false },
     brideName: { type: String, required: false },
     brideParents: { type: String, required: false },
     weddingDate: { type: Date, required: false },
-    venue: { type: String, required: false }
+    venue: { type: String, required: false },
+    couples: [{
+        groomName: String,
+        brideName: String
+    }]
 
 });
 
