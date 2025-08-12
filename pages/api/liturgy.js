@@ -111,44 +111,46 @@ export default async function handle(req, res) {
 
     if (method === 'PUT') {
         try {
-            let body = '';
-            
-            // Handle both JSON and form-data
-            if (req.headers['content-type']?.includes('application/json')) {
-                for await (const chunk of req) {
-                    body += chunk;
-                }
-                const { _id, published } = JSON.parse(body);
-                
-                if (!_id) {
-                    return res.status(400).json({ error: 'Document ID is required' });
-                }
+            const form = formidable({});
+            const [fields, files] = await form.parse(req);
 
-                await LiturgicalProgram.updateOne(
-                    { _id },
-                    { $set: { published: !!published } }
-                );
-                
-                res.json({ success: true });
-            } else {
-                // Fallback to form-data for backward compatibility
-                const form = formidable({});
-                const [fields] = await form.parse(req);
-                
-                const _id = fields._id?.[0];
-                const published = fields.published?.[0] === 'true';
-    
-                if (!_id) {
-                    return res.status(400).json({ error: 'Document ID is required' });
-                }
-    
-                await LiturgicalProgram.updateOne(
-                    { _id },
-                    { $set: { published } }
-                );
-    
-                res.json({ success: true });
+            const { _id, ...updateData } = Object.fromEntries(
+                Object.entries(fields).map(([key, value]) => [key, value[0]])
+            );
+
+            if (!_id) {
+                return res.status(400).json({ error: 'Document ID is required' });
             }
+
+            // Parse stringified arrays
+            if (updateData.days) {
+                updateData.days = JSON.parse(updateData.days);
+            }
+            if (updateData.warnings) {
+                updateData.warnings = JSON.parse(updateData.warnings);
+            }
+
+            // Handle file upload
+            const file = files.file?.[0];
+            if (file) {
+                const s3Upload = await uploadToS3(file, `liturgical/${Date.now()}-${file.originalFilename}`);
+                updateData.awsS3Key = s3Upload.key;
+                updateData.fileUrl = s3Upload.url;
+                updateData.originalFileName = file.originalFilename;
+            }
+
+            const updatedProgram = await LiturgicalProgram.findByIdAndUpdate(
+                _id,
+                { $set: updateData },
+                { new: true } // Return the updated document
+            );
+
+            if (!updatedProgram) {
+                return res.status(404).json({ error: 'Program not found' });
+            }
+
+            res.json({ success: true, program: updatedProgram });
+
         } catch (error) {
             console.error('Error updating document:', error);
             res.status(500).json({ error: error.message });

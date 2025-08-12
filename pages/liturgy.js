@@ -1,8 +1,9 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { Loader2, Upload, Check, X, Plus, Calendar } from 'lucide-react';
+import { Loader2, Upload, Check, X, Plus, Calendar, Edit } from 'lucide-react';
 import Layout from '@/components/Layout';
 import { useAuth } from '@/hooks/useAuth';
+import EditLiturgicalDocumentModal from '@/components/EditLiturgicalDocumentModal';
 
 export default function LiturgyPage() {
   const [programs, setPrograms] = useState([]);
@@ -17,6 +18,7 @@ export default function LiturgyPage() {
   const fileInputRef = React.useRef(null);
   const { canPublish, canDelete } = useAuth();
   const [activeTab, setActiveTab] = useState('documents');
+  const [editingProgram, setEditingProgram] = useState(null);
 
   useEffect(() => {
     fetchPrograms();
@@ -130,6 +132,68 @@ export default function LiturgyPage() {
       }
     } catch (error) {
       console.error('Error deleting program:', error);
+    }
+  };
+
+  const handleEditProgram = (program) => {
+    setEditingProgram(program);
+  };
+
+  const handleSaveProgram = async (programId, updatedData, file) => {
+    try {
+      setUploading(true);
+      const formData = new FormData();
+      formData.append('_id', programId);
+
+      const dataToSend = { ...updatedData };
+      if (dataToSend.dailySchedules) {
+        dataToSend.days = dataToSend.dailySchedules.map(day => {
+          const { events, ...restOfDay } = day;
+          return { ...restOfDay, schedule: events };
+        });
+        delete dataToSend.dailySchedules;
+      }
+
+      Object.keys(dataToSend).forEach(key => {
+        if (key === 'days') {
+          formData.append(key, JSON.stringify(dataToSend[key]));
+        } else {
+          formData.append(key, dataToSend[key]);
+        }
+      });
+
+      if (file) {
+        formData.append('file', file);
+      }
+
+      const response = await fetch('/api/liturgy', {
+        method: 'PUT',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save program');
+      }
+
+      const result = await response.json();
+
+      if (result.success && result.program) {
+        setPrograms(prevPrograms => 
+          prevPrograms.map(p => p._id === programId ? result.program : p)
+        );
+
+        if (selectedProgram?._id === programId) {
+          setSelectedProgram(result.program);
+        }
+      } else {
+        await fetchPrograms();
+      }
+
+      setEditingProgram(null);
+    } catch (error) {
+      console.error('Error saving program:', error);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -306,6 +370,15 @@ export default function LiturgyPage() {
                         }`}
                       >
                         {selectedProgram.published ? 'Unpublish' : 'Publish Now'}
+                      </button>
+                    )}
+                    {canPublish && (
+                      <button
+                        onClick={() => handleEditProgram(selectedProgram)}
+                        className="px-4 py-2 bg-blue-100 text-blue-700 rounded-md text-sm font-medium hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                      >
+                        <Edit className="w-4 h-4 inline mr-1" />
+                        Edit
                       </button>
                     )}
                     {canDelete && (
@@ -724,6 +797,14 @@ export default function LiturgyPage() {
               </div>
             )}
           </div>
+        )}
+        {editingProgram && (
+          <EditLiturgicalDocumentModal
+            program={editingProgram}
+            onSave={handleSaveProgram}
+            onClose={() => setEditingProgram(null)}
+            loading={uploading}
+          />
         )}
       </div>
     </Layout>
