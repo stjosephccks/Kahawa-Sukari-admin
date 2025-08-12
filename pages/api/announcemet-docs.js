@@ -100,26 +100,63 @@ export default async function handle(req, res) {
     }
 
     if (method === 'PUT') {
-    
         try {
             const form = formidable({});
-            const [fields] = await form.parse(req);
-            
-            const _id = fields._id?.[0];
-            const published = fields.published?.[0] === 'true';
+            const [fields, files] = await form.parse(req);
 
+            const _id = fields._id?.[0];
             if (!_id) {
                 return res.status(400).json({ error: 'Document ID is required' });
             }
 
-            const updateData = { published };
-            
+            const updateData = {
+                published: fields.published?.[0] === 'true',
+                liturgicalSeason: fields.liturgicalSeason?.[0] || undefined,
+                massAnimation: fields.massAnimation?.[0] || undefined,
+                occasion: fields.occasion?.[0] || undefined,
+                nextWeekOccasion: fields.nextWeekOccasion?.[0] || undefined,
+                nextWeekDate: fields.nextWeekDate?.[0] ? new Date(fields.nextWeekDate[0]) : undefined,
+                documentDate: fields.documentDate?.[0] ? new Date(fields.documentDate[0]) : undefined,
+                currentWeekMass: fields.currentWeekMass ? JSON.parse(fields.currentWeekMass[0]) : undefined,
+                nextWeekMasses: fields.nextWeekMasses ? JSON.parse(fields.nextWeekMasses[0]) : undefined,
+                announcements: fields.announcements ? JSON.parse(fields.announcements[0]) : undefined,
+                matrimonyNotices: fields.matrimonyNotices ? JSON.parse(fields.matrimonyNotices[0]) : undefined,
+            };
+
+            // Remove undefined fields to prevent overwriting with undefined
+            Object.keys(updateData).forEach(key => updateData[key] === undefined && delete updateData[key]);
+
+            // If a file is provided, upload to S3 and update file-related fields
+            const file = files.file?.[0];
+            if (file) {
+                const originalFileName = fields.originalFileName?.[0] || file.originalFilename;
+                const s3Upload = await uploadToS3(file, originalFileName);
+                updateData.awsS3Key = s3Upload.key;
+                updateData.fileUrl = s3Upload.url;
+                updateData.originalFileName = originalFileName;
+
+                // Re-parse the document if a new file is uploaded
+                console.log('\n[API] Starting document parsing for update...');
+                const parsedData = await ChurchDocumentParser.parseDocx(file.filepath);
+                console.log('\n[API] Parsed data:', JSON.stringify(parsedData, null, 2));
+
+                updateData.processingStatus = 'parsed';
+                updateData.announcements = parsedData.announcements || updateData.announcements || [];
+                updateData.matrimonyNotices = parsedData.matrimonyNotices || updateData.matrimonyNotices || [];
+                updateData.liturgicalSeason = parsedData.liturgicalSeason || updateData.liturgicalSeason;
+                updateData.massAnimation = parsedData.massAnimation || updateData.massAnimation;
+                updateData.nextWeekDate = parsedData.nextWeekDate || updateData.nextWeekDate;
+                updateData.nextWeekOccasion = parsedData.nextWeekOccasion || updateData.nextWeekOccasion;
+                updateData.documentDate = parsedData.documentDate || updateData.documentDate || new Date();
+            }
+
             await AnnouncementDocument.updateOne(
                 { _id },
                 { $set: updateData }
             );
 
-            res.json({ success: true });
+            const updatedDoc = await AnnouncementDocument.findById(_id);
+            res.json(updatedDoc);
         } catch (error) {
             console.error('Error updating document:', error);
             res.status(500).json({ error: error.message });
