@@ -60,26 +60,57 @@ export default function LiturgyPage() {
   };
 
   const handlePublish = async (id, currentStatus) => {
+    if (!id) {
+      console.error('No document ID provided');
+      return;
+    }
+    
+    // Save the current state for potential rollback
+    const previousPrograms = [...programs];
+    const previousSelectedProgram = selectedProgram;
+    
+    // Immediately update both the programs list and selectedProgram
+    const newStatus = !currentStatus;
+    const updatedPrograms = programs.map(program => 
+      program._id === id ? { ...program, published: newStatus } : program
+    );
+    
+    setPrograms(updatedPrograms);
+    
+    // Also update the selectedProgram if it's the one being modified
+    if (selectedProgram && selectedProgram._id === id) {
+      setSelectedProgram(prev => ({
+        ...prev,
+        published: newStatus
+      }));
+    }
+  
     try {
+      const formData = new FormData();
+      formData.append('_id', id);
+      formData.append('published', newStatus.toString());
+  
       const response = await fetch('/api/liturgy', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          _id: id,
-          published: !currentStatus
-        })
+        body: formData,
       });
-
+  
       if (!response.ok) {
         throw new Error('Failed to update publish status');
       }
-
-      // Refresh the programs list
+      
+      // Refresh the data to ensure consistency
       await fetchPrograms();
+      
     } catch (error) {
-      console.error('Error updating publish status:', error);
+      console.error('Error updating publish status:', error.message);
+      // Revert to previous state on error
+      setPrograms(previousPrograms);
+      if (previousSelectedProgram) {
+        setSelectedProgram(previousSelectedProgram);
+      }
+      // Optionally show an error message to the user
+      alert('Failed to update publish status. Please try again.');
     }
   };
 

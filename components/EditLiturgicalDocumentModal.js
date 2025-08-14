@@ -147,13 +147,13 @@ export default function EditLiturgicalDocumentModal({ program, onSave, onClose, 
                           <input type="text" value={event.location || ''} onChange={(e) => handleScheduleChange(dayIndex, eventIndex, 'location', e.target.value)} placeholder="Location" className="border rounded p-2" />
                           <input type="text" value={event.serviceType || ''} onChange={(e) => handleScheduleChange(dayIndex, eventIndex, 'serviceType', e.target.value)} placeholder="Service Type" className="border rounded p-2" />
                         </div>
-                        <textarea
+                        {/* <textarea
                           value={event.originalText || ''}
                           onChange={(e) => handleScheduleChange(dayIndex, eventIndex, 'originalText', e.target.value)}
                           placeholder="Original Text"
                           className="border rounded p-2 w-full mt-2"
                           rows="2"
-                        ></textarea>
+                        ></textarea> */}
                         <button type="button" onClick={() => removeEvent(dayIndex, eventIndex)} className="absolute top-1 right-1 text-red-500 hover:text-red-700">
                           <X className="w-4 h-4" />
                         </button>
