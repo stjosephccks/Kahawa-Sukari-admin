@@ -12,39 +12,81 @@ export default async function handle(req, res) {
             res.json(await Bulletin.findOne({ _id: req.query.id }))
         }
         else {
-            res.json(await Bulletin.find())
+            // Return most recent first
+            res.json(await Bulletin.find().sort({ createdAt: -1 }))
         }
     }
 
     if (method === 'POST') {
-       
-        const { title, content, images, description, sections, published } = req.body;
-        console.log('Creating bulletin with published:', published);
-        // const isPublished = !(published === false || published === 'false' || published === 0 || published === '0')
-        const BulletinDocument = await Bulletin.create({
-            title, content, description, images, sections, published: Boolean(published)
+        // Capture all supported fields from the model and form
+        const { 
+            title, 
+            content, 
+            description, 
+            excerpt,
+            featuredImage,
+            images,
+            tags,
+            featured,
+            sections,
+            published,
+            author
+        } = req.body;
 
-        })
-        console.log('Created bulletin:', BulletinDocument);
+        if (!title || !content) {
+            return res.status(400).json({ error: 'Title and content are required.' });
+        }
+
+        const BulletinDocument = await Bulletin.create({
+            title,
+            content,
+            description,
+            excerpt,
+            featuredImage,
+            images: Array.isArray(images) ? images : [],
+            tags: Array.isArray(tags) ? tags : [],
+            featured: Boolean(featured),
+            sections: Array.isArray(sections) ? sections : [],
+            published: Boolean(published),
+            author: author && typeof author === 'object' ? author : undefined
+        });
+
         res.json(BulletinDocument)
 
 
     }
     if (method === 'PUT') {
-        
-        const { title, content, description, images, sections, published, _id } = req.body;
+        const { 
+            title, 
+            content, 
+            description, 
+            excerpt,
+            featuredImage,
+            images, 
+            tags,
+            featured,
+            sections, 
+            published, 
+            author,
+            _id 
+        } = req.body;
 
-        const updateData = {
-            title,
-            content,
-            description,
-            images,
-            published: Boolean(published)
-        };
-
-        if (sections !== undefined) {
-            updateData.sections = sections;
+        if (!_id) {
+            return res.status(400).json({ error: 'Bulletin _id is required for updates.' });
         }
+
+        const updateData = {};
+        if (title !== undefined) updateData.title = title;
+        if (content !== undefined) updateData.content = content;
+        if (description !== undefined) updateData.description = description;
+        if (excerpt !== undefined) updateData.excerpt = excerpt;
+        if (featuredImage !== undefined) updateData.featuredImage = featuredImage;
+        if (images !== undefined) updateData.images = Array.isArray(images) ? images : [];
+        if (tags !== undefined) updateData.tags = Array.isArray(tags) ? tags : [];
+        if (featured !== undefined) updateData.featured = Boolean(featured);
+        if (sections !== undefined) updateData.sections = Array.isArray(sections) ? sections : [];
+        if (published !== undefined) updateData.published = Boolean(published);
+        if (author !== undefined) updateData.author = author && typeof author === 'object' ? author : undefined;
 
         const result = await Bulletin.findOneAndUpdate(
             { _id },
