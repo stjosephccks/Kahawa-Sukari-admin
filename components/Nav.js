@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import Logo from "./Logo";
 import DailyReadings from './DailyReadings'; 
+import useAuth from "@/hooks/useAuth";
 
 
 
@@ -13,6 +14,7 @@ export default function Nav({ show }) {
     const inactiveIcon = "w-6 h-6";
     const activeIcon = inactiveIcon + " text-primary"
     const router = useRouter()
+    const {role} = useAuth()
     const { pathname } = router;
     async function logout() {
         await router.push('/');
@@ -41,6 +43,15 @@ export default function Nav({ show }) {
 
                     Users
                 </Link>
+                {role === 'super_admin' && (
+                <Link href={'/zaka'} className={pathname === ('/zaka') ? activeLink : inactiveLink}>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z" />
+                    </svg>
+
+                    Zaka
+                </Link>
+                )}
                 <Link href={'/announcement'} className={pathname === ('/announcement') ? activeLink : inactiveLink}>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={pathname === ('/announcement') ? activeIcon : inactiveIcon}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
