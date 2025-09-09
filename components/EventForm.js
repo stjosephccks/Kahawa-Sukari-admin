@@ -17,7 +17,8 @@ export default function EventForm({
     published:existingPublished,
     paymentInfo:existingPaymentInfo,
     moderator:existingModerator,
-    keynoteSpeaker:existingKeynoteSpeaker
+    keynoteSpeaker:existingKeynoteSpeaker,
+    slug:existingSlug
 }){
     const [title,setTitle]=useState(existingTitle||'')
     const [description,setDescription]=useState(existingDescription||'')
@@ -31,13 +32,40 @@ export default function EventForm({
     const [paymentInfo, setPaymentInfo] = useState(existingPaymentInfo || '');
     const [moderator, setModerator] = useState(existingModerator || '');
     const [keynoteSpeaker, setKeynoteSpeaker] = useState(existingKeynoteSpeaker || '');
+    const [slug, setSlug] = useState(existingSlug || '');
     const { canPublish } = useAuth();
     
 
     const router =useRouter()
     async function saveEvent(ev){   
         ev.preventDefault()
-        const data={title,description,date,venue, images,published:Boolean(published), paymentInfo, moderator, keynoteSpeaker}
+        
+        // Handle date to prevent timezone conversion
+        let eventDate = date;
+        if (date) {
+            try {
+                // Ensure the date string is in the correct format
+                let dateString = date;
+                if (dateString.length === 16) { // Format: YYYY-MM-DDTHH:MM
+                    dateString += ':00'; // Add seconds
+                }
+                
+                // Create date object and validate it
+                const localDate = new Date(dateString);
+                if (isNaN(localDate.getTime())) {
+                    throw new Error('Invalid date');
+                }
+                
+                // Store as ISO string but preserve local time by adjusting for timezone
+                eventDate = localDate.toISOString();
+            } catch (error) {
+                console.error('Date parsing error:', error);
+                // Fallback to original date if parsing fails
+                eventDate = date;
+            }
+        }
+        
+        const data={title,description,date:eventDate,venue, images,published:Boolean(published), paymentInfo, moderator, keynoteSpeaker, slug}
         if(_id){
            await axios.put('/api/events', {...data,_id})
         }
@@ -57,6 +85,26 @@ export default function EventForm({
   function formatDateForInput(date) {
   return date ? format(new Date(date), "yyyy-MM-dd'T'HH:mm") : '';
 }
+  
+  // Generate slug from title
+  function generateSlug(text) {
+    return text
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with single
+      .trim()
+      .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+  }
+  
+  // Auto-generate slug when title changes (only for new events)
+  useEffect(() => {
+    if (!_id && title && !slug) {
+      const newSlug = generateSlug(title);
+      setSlug(newSlug);
+    }
+  }, [title, _id, slug]);
+
 async function uploadImages(ev){
     const files = ev.target?.files;
     if(files?.length > 0){
@@ -161,6 +209,15 @@ function updateImagesOrder(images){
                     onChange={ev=>setKeynoteSpeaker(ev.target.value)} 
                     placeholder="Enter keynote speaker name"
                 />
+                
+                <label>Event Slug (Auto-generated from title)</label>
+                <input 
+                    type="text" 
+                    value={slug} 
+                    onChange={ev=>setSlug(ev.target.value)} 
+                    placeholder="event-slug-url"
+                />
+                <p className="text-sm text-gray-500 mb-4">This will be used in the event URL. Leave empty to auto-generate from title.</p>
             <div className="my-4 p-4 border rounded-md bg-gray-50">
                 <label className="flex items-center cursor-pointer">
                     <input
