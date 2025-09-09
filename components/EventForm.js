@@ -14,7 +14,10 @@ export default function EventForm({
     date:existingDate,
     venue:existingVenue,
     images:existingImages,
-    published:existingPublished
+    published:existingPublished,
+    paymentInfo:existingPaymentInfo,
+    moderator:existingModerator,
+    keynoteSpeaker:existingKeynoteSpeaker
 }){
     const [title,setTitle]=useState(existingTitle||'')
     const [description,setDescription]=useState(existingDescription||'')
@@ -25,13 +28,16 @@ export default function EventForm({
     const [venue,setVenue]= useState(existingVenue||'')
     const [loadedImages, setLoadedImages] = useState(Array(images.length).fill(false));
     const [published, setPublished] = useState(Boolean(existingPublished));
+    const [paymentInfo, setPaymentInfo] = useState(existingPaymentInfo || '');
+    const [moderator, setModerator] = useState(existingModerator || '');
+    const [keynoteSpeaker, setKeynoteSpeaker] = useState(existingKeynoteSpeaker || '');
     const { canPublish } = useAuth();
     
 
     const router =useRouter()
     async function saveEvent(ev){   
         ev.preventDefault()
-        const data={title,description,date,venue, images,published:Boolean(published)}
+        const data={title,description,date,venue, images,published:Boolean(published), paymentInfo, moderator, keynoteSpeaker}
         if(_id){
            await axios.put('/api/events', {...data,_id})
         }
@@ -132,8 +138,29 @@ function updateImagesOrder(images){
                 <label>Date of Event</label>
                 <input value={formatDateForInput(date)} onChange={ev=>setDate(ev.target.value)} type="datetime-local"></input>
                 
-            
-            {canPublish && (
+                <label>Payment Info (Optional)</label>
+                <textarea 
+                    rows={3} 
+                    value={paymentInfo} 
+                    onChange={ev=>setPaymentInfo(ev.target.value)} 
+                    placeholder="Enter payment details if required (e.g., ticket price, payment methods, etc.)"
+                ></textarea>
+                
+                <label>Moderator (Optional)</label>
+                <input 
+                    type="text" 
+                    value={moderator} 
+                    onChange={ev=>setModerator(ev.target.value)} 
+                    placeholder="Enter moderator name"
+                />
+                
+                <label>Keynote Speaker (Optional)</label>
+                <input 
+                    type="text" 
+                    value={keynoteSpeaker} 
+                    onChange={ev=>setKeynoteSpeaker(ev.target.value)} 
+                    placeholder="Enter keynote speaker name"
+                />
             <div className="my-4 p-4 border rounded-md bg-gray-50">
                 <label className="flex items-center cursor-pointer">
                     <input
@@ -153,7 +180,7 @@ function updateImagesOrder(images){
                     }
                 </p>
             </div>
-            )}
+
                 
             <div className="flex gap-2">
                 <button 

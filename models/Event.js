@@ -7,7 +7,10 @@ const EventSchema = new Schema({
     date:{type:Date,required:true},
     venue:{type:String, required:true},
     images:{type:[String]},
-    published:{type:Boolean, default:false}
+    published:{type:Boolean, default:false},
+    paymentInfo:{type:String},
+    moderator:{type:String},
+    keynoteSpeaker:{type:String}
 
 });
 export const Event = models.Event||model('Event', EventSchema);
