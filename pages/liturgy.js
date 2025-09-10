@@ -431,7 +431,7 @@ export default function LiturgyPage() {
                     <div className="flex items-start">
                       <div className="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center mr-4">
                         <span className="text-indigo-800 font-medium">
-                          {day.day.substring(0, 1)}
+                          {day?.day?.substring(0, 1)}
                         </span>
                       </div>
                       <div className="flex-1 min-w-0">
