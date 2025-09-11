@@ -35,14 +35,15 @@ export default async function handle(req, res) {
             $or: [
               { fullName: { $regex: search, $options: 'i' } },
               { zakaNumber: { $regex: search, $options: 'i' } },
-              { mobileNumber: { $regex: search, $options: 'i' } }
+              { mobileNumber: { $regex: search, $options: 'i' } },
+              { mobileNumber2: { $regex: search, $options: 'i' } }
             ]
           };
         }
         
         const total = await Zaka.countDocuments(query);
         const zakas = await Zaka.find(query)
-          .sort({ createdAt: -1 })
+          .sort({ createdAt: 1, zakaNumber: 1 })
           .skip((page - 1) * limit)
           .limit(limit);
           
@@ -63,7 +64,7 @@ export default async function handle(req, res) {
     if (!isAuthorized) return;
 
     if (method === "POST") {
-      const { zakaNumber, fullName, mobileNumber } = req.body;
+      const { zakaNumber, fullName, mobileNumber, mobileNumber2, group } = req.body;
       
       // Validate required fields
       if (!zakaNumber || !fullName || !mobileNumber) {
@@ -83,14 +84,16 @@ export default async function handle(req, res) {
       const zakaDoc = await Zaka.create({
         zakaNumber: zakaNumber.trim(),
         fullName: fullName.trim(),
-        mobileNumber: mobileNumber.trim()
+        mobileNumber: mobileNumber.trim(),
+        mobileNumber2: mobileNumber2 ? mobileNumber2.trim() : undefined,
+        group:group.trim()
       });
       
       return res.json(zakaDoc);
     }
 
     if (method === "PUT") {
-      const { _id, zakaNumber, fullName, mobileNumber } = req.body;
+      const { _id, zakaNumber, fullName, mobileNumber, mobileNumber2, group } = req.body;
       
       if (!_id) {
         return res.status(400).json({ error: "ID is required for update" });
@@ -113,6 +116,8 @@ export default async function handle(req, res) {
       if (zakaNumber) updateData.zakaNumber = zakaNumber.trim();
       if (fullName) updateData.fullName = fullName.trim();
       if (mobileNumber) updateData.mobileNumber = mobileNumber.trim();
+      if (mobileNumber2 !== undefined) updateData.mobileNumber2 = mobileNumber2 ? mobileNumber2.trim() : undefined;
+      if(group) updateData.group = group.trim();
 
       const zakaDoc = await Zaka.findByIdAndUpdate(
         _id, 

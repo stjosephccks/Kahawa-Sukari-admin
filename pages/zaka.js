@@ -23,7 +23,9 @@ export default function ZakaPage() {
   const [formData, setFormData] = useState({
     zakaNumber: '',
     fullName: '',
-    mobileNumber: ''
+    mobileNumber: '',
+    mobileNumber2: '',
+    group:''
   });
 
   useEffect(() => {
@@ -68,7 +70,7 @@ export default function ZakaPage() {
         await axios.post('/api/zaka', formData);
       }
       
-      setFormData({ zakaNumber: '', fullName: '', mobileNumber: '' });
+      setFormData({ zakaNumber: '', fullName: '', mobileNumber: '', mobileNumber2: '', group:'' });
       setShowForm(false);
       setEditingZaka(null);
       fetchZakas();
@@ -82,7 +84,9 @@ export default function ZakaPage() {
     setFormData({
       zakaNumber: zaka.zakaNumber,
       fullName: zaka.fullName,
-      mobileNumber: zaka.mobileNumber
+      mobileNumber: zaka.mobileNumber,
+      mobileNumber2: zaka.mobileNumber2 || '',
+      group:zaka.group
     });
     setShowForm(true);
   };
@@ -99,7 +103,7 @@ export default function ZakaPage() {
   };
 
   const resetForm = () => {
-    setFormData({ zakaNumber: '', fullName: '', mobileNumber: '' });
+    setFormData({ zakaNumber: '', fullName: '', mobileNumber: '', mobileNumber2: '', group:'' });
     setEditingZaka(null);
     setShowForm(false);
   };
@@ -195,6 +199,29 @@ export default function ZakaPage() {
                     required
                   />
                 </div>
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Mobile Number 2 (Optional)
+                  </label>
+                  <input
+                    type="tel"
+                    value={formData.mobileNumber2}
+                    onChange={(e) => setFormData({ ...formData, mobileNumber2: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Jumuiya/ Group
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.group}
+                    onChange={(e) => setFormData({ ...formData, group: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    
+                  />
+                </div>
                 <div className="flex justify-end space-x-3">
                   <button
                     type="button"
@@ -230,8 +257,12 @@ export default function ZakaPage() {
                   Mobile Number
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Created At
+                  Alt Mobile Number
                 </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Group/Jumuiya
+                </th>
+                
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
@@ -263,8 +294,12 @@ export default function ZakaPage() {
                       {zaka.mobileNumber}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(zaka.createdAt).toLocaleDateString()}
+                      {zaka.mobileNumber2}
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {zaka.group}
+                    </td>
+                    
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <button
                         onClick={() => handleEdit(zaka)}

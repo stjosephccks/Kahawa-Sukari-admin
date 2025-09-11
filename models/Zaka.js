@@ -15,7 +15,6 @@ const ZakaSchema = new Schema({
   },
   mobileNumber: { 
     type: String, 
-    required: true,
     trim: true,
     validate: {
       validator: function(v) {
@@ -27,6 +26,23 @@ const ZakaSchema = new Schema({
       },
       message: 'Please enter a valid mobile number (9-15 digits, + allowed)'
     }
+  },
+  mobileNumber2: { 
+    type: String,
+    trim: true,
+    validate: {
+      validator: function(v) {
+        // Only validate if value is provided
+        if (!v) return true;
+        // Same validation as mobileNumber
+        const flexibleFormat = /^[\+]?[0-9]{9,15}$/;
+        return flexibleFormat.test(v.replace(/[\s\-\(\)]/g, ''));
+      },
+      message: 'Please enter a valid mobile number (9-15 digits, + allowed)'
+    }
+  },
+  group:{
+    type:String
   }
 }, {
   timestamps: true // Adds createdAt and updatedAt fields
