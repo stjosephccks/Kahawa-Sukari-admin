@@ -42,7 +42,7 @@ export default function EditLiturgicalDocumentModal({ program, onSave, onClose, 
   const addEvent = (dayIndex) => {
     setFormData(prev => {
       const newSchedules = [...prev.dailySchedules];
-      newSchedules[dayIndex].events.push({ time: '', service: '', language: '', location: '', serviceType: '' });
+      newSchedules[dayIndex].events.push({ time: '', service: '', language: '', location: '' });
       return { ...prev, dailySchedules: newSchedules };
     });
   };
@@ -76,7 +76,7 @@ export default function EditLiturgicalDocumentModal({ program, onSave, onClose, 
 
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-7xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-900">Edit Liturgical Program</h2>
           <button onClick={onClose} className="text-gray-600 hover:text-gray-900">
@@ -120,7 +120,6 @@ export default function EditLiturgicalDocumentModal({ program, onSave, onClose, 
             </div>
           </div>
 
-          {/* Daily Schedules */}
           <div>
             <div className="flex justify-between items-center mb-2">
               <h3 className="text-lg font-medium text-gray-900">Daily Schedules</h3>
@@ -140,20 +139,25 @@ export default function EditLiturgicalDocumentModal({ program, onSave, onClose, 
                   <div className="space-y-2">
                     {day.events.map((event, eventIndex) => (
                       <div key={eventIndex} className="border p-3 rounded bg-white space-y-2 relative">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                          <input type="text" value={event.time || ''} onChange={(e) => handleScheduleChange(dayIndex, eventIndex, 'time', e.target.value)} placeholder="Time (e.g., 6:30 AM)" className="border rounded p-2" />
-                          <input type="text" value={event.service || ''} onChange={(e) => handleScheduleChange(dayIndex, eventIndex, 'service', e.target.value)} placeholder="Service (e.g., Mass)" className="border rounded p-2" />
-                          <input type="text" value={event.language || ''} onChange={(e) => handleScheduleChange(dayIndex, eventIndex, 'language', e.target.value)} placeholder="Language (e.g., English)" className="border rounded p-2" />
-                          <input type="text" value={event.location || ''} onChange={(e) => handleScheduleChange(dayIndex, eventIndex, 'location', e.target.value)} placeholder="Location" className="border rounded p-2" />
-                          <input type="text" value={event.serviceType || ''} onChange={(e) => handleScheduleChange(dayIndex, eventIndex, 'serviceType', e.target.value)} placeholder="Service Type" className="border rounded p-2" />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
+                            <input type="text" value={event.time || ''} onChange={(e) => handleScheduleChange(dayIndex, eventIndex, 'time', e.target.value)} placeholder="e.g., 6:30 AM" className="border rounded p-2 w-full" />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Service</label>
+                            <input type="text" value={event.service || ''} onChange={(e) => handleScheduleChange(dayIndex, eventIndex, 'service', e.target.value)} placeholder="e.g., Mass" className="border rounded p-2 w-full" />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
+                            <input type="text" value={event.language || ''} onChange={(e) => handleScheduleChange(dayIndex, eventIndex, 'language', e.target.value)} placeholder="e.g., English" className="border rounded p-2 w-full" />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                            <input type="text" value={event.location || ''} onChange={(e) => handleScheduleChange(dayIndex, eventIndex, 'location', e.target.value)} placeholder="e.g., Main Church" className="border rounded p-2 w-full" />
+                          </div>
                         </div>
-                        {/* <textarea
-                          value={event.originalText || ''}
-                          onChange={(e) => handleScheduleChange(dayIndex, eventIndex, 'originalText', e.target.value)}
-                          placeholder="Original Text"
-                          className="border rounded p-2 w-full mt-2"
-                          rows="2"
-                        ></textarea> */}
+                       
                         <button type="button" onClick={() => removeEvent(dayIndex, eventIndex)} className="absolute top-1 right-1 text-red-500 hover:text-red-700">
                           <X className="w-4 h-4" />
                         </button>
