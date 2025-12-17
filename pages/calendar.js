@@ -15,7 +15,7 @@ export default function CalendarPage() {
     const eventTypes = ['All', 'Parish', 'ADN', 'Deanery', 'Other'];
     const { role } = useAuth();
 
-    const groups = ['All', 'PMC', 'YCA', 'MYM', 'Mantle', 'Charistmatic','Liturgical Group', 'CL', 'Carovana', 'Emmanuela Matzolla', 'St.Joseph Hospital', 'Choir', 'CWA', 'CMA', 'Parish Council', 'Other'];
+    const groups = ['All', 'PMC', 'YCA', 'MYM', 'Mantle', 'Charistmatic','Liturgical Group', 'CL', 'Carovana', 'Emanuela Mazzola', 'St.Joseph Hospital', 'Choir', 'CWA', 'CMA', 'Parish Council', 'Other'];
 
     useEffect(() => {
         loadEvents();
@@ -246,7 +246,7 @@ function getGroupColor(group) {
         'Charistmatic': '#f59e0b', // amber-500
         'CL': '#ef4444',           // red-500
         'Carovana': '#6366f1',     // indigo-500
-        'Emmanuela Matzolla': '#14b8a6', // teal-500
+        'Emanuela Mazzola': '#14b8a6', // teal-500
         'St.Joseph Hospital': '#f97316', // orange-500
         'Choir': '#8b5cf6',        // violet-500
         'CWA': '#ec4899',          // pink-500

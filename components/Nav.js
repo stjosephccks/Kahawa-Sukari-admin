@@ -90,7 +90,7 @@ export default function Nav({ show }) {
                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={pathname.includes('/daily-readings') ? activeIcon : inactiveIcon}>
                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-6h6v6m2 4H7a2 2 0 01-2-2V5a2 2 0 012-2h5.5L17 7.5V19a2 2 0 01-2 2z" />
                 </svg>
-                  Calender
+                  Calendar
                </Link>
                <Link href={'/liturgy'} className={pathname.includes('/liturgy') ? activeLink : inactiveLink}>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={pathname.includes('/liturgy') ? activeIcon : inactiveIcon}>

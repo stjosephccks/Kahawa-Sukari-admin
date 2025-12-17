@@ -11,7 +11,7 @@ export default function CalendarEventForm({ event, onClose, onSave }) {
     const [description, setDescription] = useState(event?.description || '');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const groups = ['All', 'PMC', 'YCA', 'MYM', 'Mantle', 'Charistmatic','Liturgical Group','CL', 'Carovana', 'Emmanuela Matzolla', 'St.Joseph Hospital', 'Choir', 'CWA', 'CMA', 'Parish Council', 'Other'];
+    const groups = ['All', 'PMC', 'YCA', 'MYM', 'Mantle', 'Charistmatic','Liturgical Group','CL', 'Carovana', 'Emanuela Mazzola', 'St.Joseph Hospital', 'Choir', 'CWA', 'CMA', 'Parish Council', 'Other'];
     const activityTypes = ['Parish', 'ADN', 'Deanery', 'Other']
     function formatDateForInput(date) {
         const d = new Date(date);
