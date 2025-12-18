@@ -88,6 +88,15 @@ export default function CalendarPage() {
         }
     };
 
+    const handleDateClick = (date) => {
+        // Create a new event with the clicked date pre-filled
+        const newEvent = {
+            date: date.toISOString()
+        };
+        setSelectedEvent(newEvent);
+        setShowForm(true);
+    };
+
     return (
         <Layout>
             <div className="max-w-7xl mx-auto px-4 py-6">
@@ -182,8 +191,9 @@ export default function CalendarPage() {
                             return (
                                 <div
                                     key={day.toString()}
-                                    className={`bg-white min-h-32 p-2 border border-gray-100 hover:bg-gray-50 transition-colors ${!isSameMonth(day, currentDate) ? 'text-gray-400 bg-gray-50' : ''
+                                    className={`bg-white min-h-32 p-2 border border-gray-100 hover:bg-blue-50 transition-colors cursor-pointer ${!isSameMonth(day, currentDate) ? 'text-gray-400 bg-gray-50' : ''
                                         }`}
+                                    onClick={() => handleDateClick(day)}
                                 >
                                     <div className="font-semibold mb-2 text-sm">{format(day, 'd')}</div>
                                     <div className="space-y-1">
