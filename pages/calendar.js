@@ -15,7 +15,7 @@ export default function CalendarPage() {
     const eventTypes = ['All', 'Parish', 'ADN', 'Deanery', 'Other'];
     const { role } = useAuth();
 
-    const groups = ['All','St. JohnPaul || Outstation', 'PMC', 'YCA', 'MYM', 'Mantle', 'Charistmatic','Liturgical Group', 'CL', 'Carovana', 'Emanuela Mazzola', 'St.Joseph Hospital', 'Choir', 'CWA', 'CMA', 'Parish Council', 'Other'];
+    const groups = ['All','St. JohnPaul II Outstation', 'PMC', 'YCA', 'MYM', 'Mantle', 'Charistmatic','Liturgical Group', 'CL', 'Carovana', 'Emanuela Mazzola', 'St.Joseph Hospital', 'Choir', 'CWA', 'CMA', 'Parish Council', 'Other'];
 
     useEffect(() => {
         loadEvents();
@@ -253,7 +253,7 @@ function getGroupColor(group) {
         'CMA': '#f59e0b',          // amber-500
         'Parish Council': '#ef4444', // red-500
         // Default
-        'St. JohnPaul || Outstation': '#06b6d4', // cyan-500
+        'St. JohnPaul II Outstation': '#06b6d4', // cyan-500
         'Other': '#6b7280'         // gray-500
     };
     return colors[group] || '#6b7280';
