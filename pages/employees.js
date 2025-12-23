@@ -1,26 +1,21 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Layout from "@/components/Layout";
-import Link from "next/link";
 import useAuth from '@/hooks/useAuth';
-import { ROLES } from '@/models/Admin';
 
-export default function AdminPage() {
-    const [users, setUsers] = useState([]);
+export default function EmployeesPage() {
+    const [employees, setEmployees] = useState([]);
     const [showForm, setShowForm] = useState(false);
-    const [editingUser, setEditingUser] = useState(null);
+    const [editingEmployee, setEditingEmployee] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
-    const [roleFilter, setRoleFilter] = useState('');
     const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, pages: 0 });
     const { role } = useAuth();
 
     const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        password: '',
-        role: 'editor',
         employeeNumber: '',
+        fullName: '',
+        email: '',
         mobileNumber: '',
         department: '',
         position: '',
@@ -29,53 +24,48 @@ export default function AdminPage() {
     });
 
     useEffect(() => {
-        loadUsers();
-    }, [pagination.page, searchTerm, statusFilter, roleFilter]);
+        loadEmployees();
+    }, [pagination.page, searchTerm, statusFilter]);
 
-    async function loadUsers() {
+    async function loadEmployees() {
         try {
-            const response = await axios.get('/api/admin', {
+            const response = await axios.get('/api/employees', {
                 params: {
                     page: pagination.page,
                     limit: pagination.limit,
                     search: searchTerm,
-                    status: statusFilter,
-                    role: roleFilter
+                    status: statusFilter
                 }
             });
-            setUsers(response.data.employees);
+            setEmployees(response.data.employees);
             setPagination(response.data.pagination);
         } catch (error) {
-            console.error('Error loading users:', error);
-            alert('Failed to load users');
+            console.error('Error loading employees:', error);
+            alert('Failed to load employees');
         }
     }
 
-    function handleEdit(user) {
-        setEditingUser(user);
+    function handleEdit(employee) {
+        setEditingEmployee(employee);
         setFormData({
-            name: user.name,
-            email: user.email,
-            password: '',
-            role: user.role,
-            employeeNumber: user.employeeNumber || '',
-            mobileNumber: user.mobileNumber || '',
-            department: user.department || '',
-            position: user.position || '',
-            dateOfJoining: user.dateOfJoining ? new Date(user.dateOfJoining).toISOString().split('T')[0] : '',
-            status: user.status || 'active'
+            employeeNumber: employee.employeeNumber,
+            fullName: employee.fullName,
+            email: employee.email,
+            mobileNumber: employee.mobileNumber,
+            department: employee.department || '',
+            position: employee.position || '',
+            dateOfJoining: employee.dateOfJoining ? new Date(employee.dateOfJoining).toISOString().split('T')[0] : '',
+            status: employee.status
         });
         setShowForm(true);
     }
 
     function handleAdd() {
-        setEditingUser(null);
+        setEditingEmployee(null);
         setFormData({
-            name: '',
-            email: '',
-            password: '',
-            role: 'editor',
             employeeNumber: '',
+            fullName: '',
+            email: '',
             mobileNumber: '',
             department: '',
             position: '',
@@ -88,30 +78,30 @@ export default function AdminPage() {
     async function handleSubmit(e) {
         e.preventDefault();
         try {
-            if (editingUser) {
-                await axios.put('/api/admin', {
-                    _id: editingUser._id,
+            if (editingEmployee) {
+                await axios.put('/api/employees', {
+                    _id: editingEmployee._id,
                     ...formData
                 });
             } else {
-                await axios.post('/api/admin', formData);
+                await axios.post('/api/employees', formData);
             }
             setShowForm(false);
-            loadUsers();
+            loadEmployees();
         } catch (error) {
-            console.error('Error saving user:', error);
-            alert(error.response?.data?.error || 'Failed to save user');
+            console.error('Error saving employee:', error);
+            alert(error.response?.data?.error || 'Failed to save employee');
         }
     }
 
     async function handleDelete(id) {
-        if (confirm('Are you sure you want to delete this user?')) {
+        if (confirm('Are you sure you want to delete this employee?')) {
             try {
-                await axios.delete('/api/admin', { data: { _id: id } });
-                loadUsers();
+                await axios.delete(`/api/employees?id=${id}`);
+                loadEmployees();
             } catch (error) {
-                console.error('Error deleting user:', error);
-                alert('Failed to delete user');
+                console.error('Error deleting employee:', error);
+                alert('Failed to delete employee');
             }
         }
     }
@@ -125,56 +115,31 @@ export default function AdminPage() {
         return styles[status] || styles.active;
     }
 
-    function getRoleBadge(role) {
-        const styles = {
-            super_admin: 'bg-purple-100 text-purple-800',
-            editor: 'bg-blue-100 text-blue-800',
-            publisher: 'bg-green-100 text-green-800',
-            employee: 'bg-gray-100 text-gray-800'
-        };
-        return styles[role] || styles.editor;
-    }
-
     return (
         <Layout>
             <div className="max-w-7xl mx-auto px-4 py-6">
                 <div className="mb-6">
                     <div className="flex justify-between items-center mb-4">
-                        <h1 className="text-3xl font-bold text-gray-800">Users & Employees</h1>
-                        {role === 'super_admin' && (
-                            <button
-                                onClick={handleAdd}
-                                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 shadow-md transition-colors font-medium"
-                            >
-                                + Add User
-                            </button>
-                        )}
+                        <h1 className="text-3xl font-bold text-gray-800">Employee Management</h1>
+                        <button
+                            onClick={handleAdd}
+                            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 shadow-md transition-colors font-medium"
+                        >
+                            + Add Employee
+                        </button>
                     </div>
 
-                    <div className="flex gap-4 mb-4 flex-wrap">
+                    <div className="flex gap-4 mb-4">
                         <input
                             type="text"
-                            placeholder="Search users..."
+                            placeholder="Search employees..."
                             value={searchTerm}
                             onChange={(e) => {
                                 setSearchTerm(e.target.value);
                                 setPagination(prev => ({ ...prev, page: 1 }));
                             }}
-                            className="flex-1 min-w-[200px] px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
-                        <select
-                            value={roleFilter}
-                            onChange={(e) => {
-                                setRoleFilter(e.target.value);
-                                setPagination(prev => ({ ...prev, page: 1 }));
-                            }}
-                            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                            <option value="">All Roles</option>
-                            <option value="super_admin">Super Admin</option>
-                            <option value="editor">Editor</option>
-                            <option value="publisher">Publisher</option>
-                        </select>
                         <select
                             value={statusFilter}
                             onChange={(e) => {
@@ -197,19 +162,22 @@ export default function AdminPage() {
                             <thead className="bg-gray-50">
                                 <tr>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Name
+                                        Employee #
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Full Name
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Email
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Role
-                                    </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Employee #
+                                        Mobile
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Department
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Position
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Status
@@ -223,49 +191,48 @@ export default function AdminPage() {
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                                {users.map((user) => (
-                                    <tr key={user._id} className="hover:bg-gray-50">
+                                {employees.map((employee) => (
+                                    <tr key={employee._id} className="hover:bg-gray-50">
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            {user.name}
+                                            {employee.employeeNumber}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            {employee.fullName}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {user.email}
+                                            {employee.email}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {employee.mobileNumber}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {employee.department || '-'}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {employee.position || '-'}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getRoleBadge(user.role)}`}>
-                                                {user.role.replace('_', ' ')}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {user.employeeNumber || '-'}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {user.department || '-'}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadge(user.status)}`}>
-                                                {user.status?.replace('_', ' ') || 'active'}
+                                            <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadge(employee.status)}`}>
+                                                {employee.status.replace('_', ' ')}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
-                                            {user.totalAbsenceDays || 0}
+                                            {employee.totalAbsenceDays || 0}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <button
+                                                onClick={() => handleEdit(employee)}
+                                                className="text-blue-600 hover:text-blue-900 mr-3"
+                                            >
+                                                Edit
+                                            </button>
                                             {role === 'super_admin' && (
-                                                <>
-                                                    <button
-                                                        onClick={() => handleEdit(user)}
-                                                        className="text-blue-600 hover:text-blue-900 mr-3"
-                                                    >
-                                                        Edit
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDelete(user._id)}
-                                                        className="text-red-600 hover:text-red-900"
-                                                    >
-                                                        Delete
-                                                    </button>
-                                                </>
+                                                <button
+                                                    onClick={() => handleDelete(employee._id)}
+                                                    className="text-red-600 hover:text-red-900"
+                                                >
+                                                    Delete
+                                                </button>
                                             )}
                                         </td>
                                     </tr>
@@ -323,10 +290,10 @@ export default function AdminPage() {
 
             {showForm && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-                        <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-4 rounded-t-xl">
-                            <h2 className="text-2xl font-bold">
-                                {editingUser ? 'Edit User' : 'Add New User'}
+                    <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4">
+                            <h2 className="text-2xl font-bold text-gray-800">
+                                {editingEmployee ? 'Edit Employee' : 'Add New Employee'}
                             </h2>
                         </div>
                         
@@ -334,13 +301,26 @@ export default function AdminPage() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Employee Number *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={formData.employeeNumber}
+                                        onChange={(e) => setFormData({ ...formData, employeeNumber: e.target.value })}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Full Name *
                                     </label>
                                     <input
                                         type="text"
                                         required
-                                        value={formData.name}
-                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                        value={formData.fullName}
+                                        onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
@@ -360,57 +340,11 @@ export default function AdminPage() {
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Password {editingUser ? '(leave blank to keep current)' : '*'}
+                                        Mobile Number *
                                     </label>
                                     <input
-                                        type="password"
-                                        required={!editingUser}
-                                        value={formData.password}
-                                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Role *
-                                    </label>
-                                    <select
+                                        type="text"
                                         required
-                                        value={formData.role}
-                                        onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    >
-                                        <option value="super_admin">Super Admin</option>
-                                        <option value="editor">Editor</option>
-                                        <option value="publisher">Publisher</option>
-                                    </select>
-                                </div>
-
-                                <div className="md:col-span-2">
-                                    <h3 className="text-lg font-semibold text-gray-800 mb-3 mt-4 border-t pt-4">
-                                        Employee Information (Optional)
-                                    </h3>
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Employee Number
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={formData.employeeNumber}
-                                        onChange={(e) => setFormData({ ...formData, employeeNumber: e.target.value })}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Mobile Number
-                                    </label>
-                                    <input
-                                        type="text"
                                         value={formData.mobileNumber}
                                         onChange={(e) => setFormData({ ...formData, mobileNumber: e.target.value })}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -443,10 +377,11 @@ export default function AdminPage() {
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Date of Joining
+                                        Date of Joining *
                                     </label>
                                     <input
                                         type="date"
+                                        required
                                         value={formData.dateOfJoining}
                                         onChange={(e) => setFormData({ ...formData, dateOfJoining: e.target.value })}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -472,14 +407,14 @@ export default function AdminPage() {
                             <div className="flex gap-3 mt-6">
                                 <button
                                     type="submit"
-                                    className="flex-1 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 font-medium shadow-md transition-colors"
+                                    className="flex-1 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 font-medium"
                                 >
-                                    {editingUser ? 'Update' : 'Create'} User
+                                    {editingEmployee ? 'Update' : 'Create'} Employee
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setShowForm(false)}
-                                    className="flex-1 bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 font-medium transition-colors"
+                                    className="flex-1 bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 font-medium"
                                 >
                                     Cancel
                                 </button>
