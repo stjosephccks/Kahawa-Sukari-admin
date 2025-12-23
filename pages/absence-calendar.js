@@ -125,41 +125,41 @@ export default function AbsenceCalendarPage() {
 
     return (
         <Layout>
-            <div className="max-w-[1600px] mx-auto px-4 py-6">
-                <div className="mb-6">
-                    <div className="flex justify-between items-center mb-4">
-                        <h1 className="text-3xl font-bold text-gray-800">Employee Absence Calendar</h1>
-                        <div className="flex gap-3">
+            <div className="max-w-[1600px] mx-auto px-2 sm:px-4 py-4 sm:py-6">
+                <div className="mb-4 sm:mb-6">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
+                        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">Employee Absence Calendar</h1>
+                        <div className="flex gap-2 items-center justify-between sm:justify-end">
                             <button
                                 onClick={handlePreviousMonth}
-                                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                                className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm"
                             >
-                                ← Previous
+                                ← Prev
                             </button>
-                            <div className="px-6 py-2 bg-blue-600 text-white rounded-lg font-bold text-lg">
-                                {format(currentDate, 'MMMM yyyy')}
+                            <div className="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg font-bold text-sm sm:text-base whitespace-nowrap">
+                                {format(currentDate, 'MMM yyyy')}
                             </div>
                             <button
                                 onClick={handleNextMonth}
-                                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                                className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm"
                             >
                                 Next →
                             </button>
                         </div>
                     </div>
 
-                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 shadow-sm">
-                        <div className="flex items-center gap-6 flex-wrap">
-                            <span className="text-sm font-semibold text-gray-700">Absence type key:</span>
+                    <div className="bg-blue-50 rounded-lg p-3 sm:p-4 shadow-sm">
+                        <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
+                            <span className="text-xs sm:text-sm font-semibold text-gray-700 w-full sm:w-auto">Absence type key:</span>
                             {absenceTypes.map(type => (
-                                <div key={type.value} className="flex items-center gap-2">
+                                <div key={type.value} className="flex items-center gap-1.5">
                                     <span 
-                                        className="w-6 h-6 rounded flex items-center justify-center text-white text-xs font-bold" 
+                                        className="w-5 h-5 sm:w-6 sm:h-6 rounded flex items-center justify-center text-white text-xs font-bold" 
                                         style={{backgroundColor: type.color}}
                                     >
                                         {type.shortCode}
                                     </span>
-                                    <span className="text-sm text-gray-600">{type.label}</span>
+                                    <span className="text-xs sm:text-sm text-gray-600">{type.label}</span>
                                 </div>
                             ))}
                         </div>
