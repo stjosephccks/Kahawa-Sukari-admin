@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import Layout from "@/components/Layout";
 import useAuth from '@/hooks/useAuth';
@@ -13,23 +13,41 @@ export default function MyTasksPage() {
     const { role } = useAuth();
     const { data: session } = useSession();
 
-    useEffect(() => {
-        if (session?.user?.email) {
-            if (role === 'super_admin') {
-                loadEmployees();
-            } else {
-                loadMyTaskLists();
+    const loadMyTaskLists = useCallback(async () => {
+        try {
+            setLoading(true);
+            const response = await axios.get('/api/task-lists');
+            setTaskLists(response.data.taskLists);
+            if (response.data.taskLists.length > 0) {
+                setSelectedTaskList(response.data.taskLists[0]);
             }
+        } catch (error) {
+            console.error('Error loading task lists:', error);
+        } finally {
+            setLoading(false);
         }
-    }, [session, role]);
+    }, []);
 
-    useEffect(() => {
-        if (role === 'super_admin' && selectedEmployee) {
-            loadTaskListsForEmployee(selectedEmployee);
+    const loadTaskListsForEmployee = useCallback(async (employeeId) => {
+        try {
+            setLoading(true);
+            const response = await axios.get('/api/task-lists', {
+                params: { employeeId }
+            });
+            setTaskLists(response.data.taskLists);
+            if (response.data.taskLists.length > 0) {
+                setSelectedTaskList(response.data.taskLists[0]);
+            } else {
+                setSelectedTaskList(null);
+            }
+        } catch (error) {
+            console.error('Error loading task lists:', error);
+        } finally {
+            setLoading(false);
         }
-    }, [selectedEmployee]);
+    }, []);
 
-    async function loadEmployees() {
+    const loadEmployees = useCallback(async () => {
         try {
             const response = await axios.get('/api/admin', { params: { limit: 100 } });
             setEmployees(response.data.employees);
@@ -52,41 +70,23 @@ export default function MyTasksPage() {
         } catch (error) {
             console.error('Error loading employees:', error);
         }
-    }
+    }, [session?.user?.email]);
 
-    async function loadMyTaskLists() {
-        try {
-            setLoading(true);
-            const response = await axios.get('/api/task-lists');
-            setTaskLists(response.data.taskLists);
-            if (response.data.taskLists.length > 0) {
-                setSelectedTaskList(response.data.taskLists[0]);
-            }
-        } catch (error) {
-            console.error('Error loading task lists:', error);
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    async function loadTaskListsForEmployee(employeeId) {
-        try {
-            setLoading(true);
-            const response = await axios.get('/api/task-lists', {
-                params: { employeeId }
-            });
-            setTaskLists(response.data.taskLists);
-            if (response.data.taskLists.length > 0) {
-                setSelectedTaskList(response.data.taskLists[0]);
+    useEffect(() => {
+        if (session?.user?.email) {
+            if (role === 'super_admin') {
+                loadEmployees();
             } else {
-                setSelectedTaskList(null);
+                loadMyTaskLists();
             }
-        } catch (error) {
-            console.error('Error loading task lists:', error);
-        } finally {
-            setLoading(false);
         }
-    }
+    }, [session, role, loadEmployees, loadMyTaskLists]);
+
+    useEffect(() => {
+        if (role === 'super_admin' && selectedEmployee) {
+            loadTaskListsForEmployee(selectedEmployee);
+        }
+    }, [selectedEmployee, role, loadTaskListsForEmployee]);
 
     return (
         <Layout>

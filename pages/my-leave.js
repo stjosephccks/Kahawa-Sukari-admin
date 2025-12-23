@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import Layout from "@/components/Layout";
 import { useSession } from "next-auth/react";
@@ -26,13 +26,7 @@ export default function MyLeavePage() {
         reason: ''
     });
 
-    useEffect(() => {
-        if (session?.user?.email) {
-            loadMyAbsences();
-        }
-    }, [session]);
-
-    async function loadMyAbsences() {
+    const loadMyAbsences = useCallback(async () => {
         try {
             const userResponse = await axios.get('/api/admin', {
                 params: { search: session.user.email, limit: 1 }
@@ -50,7 +44,13 @@ export default function MyLeavePage() {
         } catch (error) {
             console.error('Error loading absences:', error);
         }
-    }
+    }, [session]);
+
+    useEffect(() => {
+        if (session?.user?.email) {
+            loadMyAbsences();
+        }
+    }, [session, loadMyAbsences]);
 
     async function handleSubmit(e) {
         e.preventDefault();

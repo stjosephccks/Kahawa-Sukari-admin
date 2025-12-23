@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import Layout from "@/components/Layout";
 import useAuth from '@/hooks/useAuth';
@@ -13,23 +13,41 @@ export default function MyAppointmentsPage() {
     const { role } = useAuth();
     const { data: session } = useSession();
 
-    useEffect(() => {
-        if (session?.user?.email) {
-            if (role === 'super_admin') {
-                loadEmployees();
-            } else {
-                loadMyAppointments();
+    const loadMyAppointments = useCallback(async () => {
+        try {
+            setLoading(true);
+            const response = await axios.get('/api/appointments');
+            setAppointments(response.data.appointments);
+            if (response.data.appointments.length > 0) {
+                setSelectedAppointment(response.data.appointments[0]);
             }
+        } catch (error) {
+            console.error('Error loading appointments:', error);
+        } finally {
+            setLoading(false);
         }
-    }, [session, role]);
+    }, []);
 
-    useEffect(() => {
-        if (role === 'super_admin' && selectedEmployee) {
-            loadAppointmentsForEmployee(selectedEmployee);
+    const loadAppointmentsForEmployee = useCallback(async (employeeId) => {
+        try {
+            setLoading(true);
+            const response = await axios.get('/api/appointments', {
+                params: { employeeId }
+            });
+            setAppointments(response.data.appointments);
+            if (response.data.appointments.length > 0) {
+                setSelectedAppointment(response.data.appointments[0]);
+            } else {
+                setSelectedAppointment(null);
+            }
+        } catch (error) {
+            console.error('Error loading appointments:', error);
+        } finally {
+            setLoading(false);
         }
-    }, [selectedEmployee]);
+    }, []);
 
-    async function loadEmployees() {
+    const loadEmployees = useCallback(async () => {
         try {
             const response = await axios.get('/api/admin', { params: { limit: 100 } });
             setEmployees(response.data.employees);
@@ -52,41 +70,23 @@ export default function MyAppointmentsPage() {
         } catch (error) {
             console.error('Error loading employees:', error);
         }
-    }
+    }, [session?.user?.email]);
 
-    async function loadMyAppointments() {
-        try {
-            setLoading(true);
-            const response = await axios.get('/api/appointments');
-            setAppointments(response.data.appointments);
-            if (response.data.appointments.length > 0) {
-                setSelectedAppointment(response.data.appointments[0]);
-            }
-        } catch (error) {
-            console.error('Error loading appointments:', error);
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    async function loadAppointmentsForEmployee(employeeId) {
-        try {
-            setLoading(true);
-            const response = await axios.get('/api/appointments', {
-                params: { employeeId }
-            });
-            setAppointments(response.data.appointments);
-            if (response.data.appointments.length > 0) {
-                setSelectedAppointment(response.data.appointments[0]);
+    useEffect(() => {
+        if (session?.user?.email) {
+            if (role === 'super_admin') {
+                loadEmployees();
             } else {
-                setSelectedAppointment(null);
+                loadMyAppointments();
             }
-        } catch (error) {
-            console.error('Error loading appointments:', error);
-        } finally {
-            setLoading(false);
         }
-    }
+    }, [session, role, loadEmployees, loadMyAppointments]);
+
+    useEffect(() => {
+        if (role === 'super_admin' && selectedEmployee) {
+            loadAppointmentsForEmployee(selectedEmployee);
+        }
+    }, [selectedEmployee, role, loadAppointmentsForEmployee]);
 
     return (
         <Layout>

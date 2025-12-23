@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import Layout from "@/components/Layout";
 import useAuth from '@/hooks/useAuth';
@@ -21,16 +21,7 @@ export default function ManageTaskListsPage() {
         tasks: []
     });
 
-    useEffect(() => {
-        if (role !== 'super_admin') {
-            router.push('/my-tasks');
-            return;
-        }
-        loadTaskLists();
-        loadEmployees();
-    }, [role]);
-
-    async function loadTaskLists() {
+    const loadTaskLists = useCallback(async () => {
         try {
             setLoading(true);
             const response = await axios.get('/api/task-lists');
@@ -41,16 +32,25 @@ export default function ManageTaskListsPage() {
         } finally {
             setLoading(false);
         }
-    }
+    }, []);
 
-    async function loadEmployees() {
+    const loadEmployees = useCallback(async () => {
         try {
             const response = await axios.get('/api/admin', { params: { limit: 100 } });
             setEmployees(response.data.employees);
         } catch (error) {
             console.error('Error loading employees:', error);
         }
-    }
+    }, []);
+
+    useEffect(() => {
+        if (role !== 'super_admin') {
+            router.push('/my-tasks');
+            return;
+        }
+        loadTaskLists();
+        loadEmployees();
+    }, [role, router, loadTaskLists, loadEmployees]);
 
     function handleNewTaskList() {
         setEditingTaskList(null);

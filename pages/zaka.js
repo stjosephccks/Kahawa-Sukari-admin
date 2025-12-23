@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import Layout from '@/components/Layout';
@@ -28,16 +28,7 @@ export default function ZakaPage() {
     group:''
   });
 
-  useEffect(() => {
-    if (status === 'loading') return;
-    if (!session) {
-      router.push('/api/auth/signin');
-      return;
-    }
-    fetchZakas();
-  }, [session, status, pagination.page, searchTerm]);
-
-  const fetchZakas = async () => {
+  const fetchZakas = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
@@ -59,7 +50,16 @@ export default function ZakaPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [pagination.page, pagination.limit, searchTerm]);
+
+  useEffect(() => {
+    if (status === 'loading') return;
+    if (!session) {
+      router.push('/api/auth/signin');
+      return;
+    }
+    fetchZakas();
+  }, [session, status, fetchZakas, router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

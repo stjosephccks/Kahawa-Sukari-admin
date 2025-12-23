@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import Layout from "@/components/Layout";
 import useAuth from '@/hooks/useAuth';
@@ -13,23 +13,41 @@ export default function MySchedulePage() {
     const { role } = useAuth();
     const { data: session } = useSession();
 
-    useEffect(() => {
-        if (session?.user?.email) {
-            if (role === 'super_admin') {
-                loadEmployees();
-            } else {
-                loadMySchedules();
+    const loadMySchedules = useCallback(async () => {
+        try {
+            setLoading(true);
+            const response = await axios.get('/api/schedules');
+            setSchedules(response.data.schedules);
+            if (response.data.schedules.length > 0) {
+                setSelectedSchedule(response.data.schedules[0]);
             }
+        } catch (error) {
+            console.error('Error loading schedules:', error);
+        } finally {
+            setLoading(false);
         }
-    }, [session, role]);
+    }, []);
 
-    useEffect(() => {
-        if (role === 'super_admin' && selectedEmployee) {
-            loadSchedulesForEmployee(selectedEmployee);
+    const loadSchedulesForEmployee = useCallback(async (employeeId) => {
+        try {
+            setLoading(true);
+            const response = await axios.get('/api/schedules', {
+                params: { employeeId }
+            });
+            setSchedules(response.data.schedules);
+            if (response.data.schedules.length > 0) {
+                setSelectedSchedule(response.data.schedules[0]);
+            } else {
+                setSelectedSchedule(null);
+            }
+        } catch (error) {
+            console.error('Error loading schedules:', error);
+        } finally {
+            setLoading(false);
         }
-    }, [selectedEmployee]);
+    }, []);
 
-    async function loadEmployees() {
+    const loadEmployees = useCallback(async () => {
         try {
             const response = await axios.get('/api/admin', { params: { limit: 100 } });
             setEmployees(response.data.employees);
@@ -56,41 +74,23 @@ export default function MySchedulePage() {
         } catch (error) {
             console.error('Error loading employees:', error);
         }
-    }
+    }, [session?.user?.email]);
 
-    async function loadMySchedules() {
-        try {
-            setLoading(true);
-            const response = await axios.get('/api/schedules');
-            setSchedules(response.data.schedules);
-            if (response.data.schedules.length > 0) {
-                setSelectedSchedule(response.data.schedules[0]);
-            }
-        } catch (error) {
-            console.error('Error loading schedules:', error);
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    async function loadSchedulesForEmployee(employeeId) {
-        try {
-            setLoading(true);
-            const response = await axios.get('/api/schedules', {
-                params: { employeeId }
-            });
-            setSchedules(response.data.schedules);
-            if (response.data.schedules.length > 0) {
-                setSelectedSchedule(response.data.schedules[0]);
+    useEffect(() => {
+        if (session?.user?.email) {
+            if (role === 'super_admin') {
+                loadEmployees();
             } else {
-                setSelectedSchedule(null);
+                loadMySchedules();
             }
-        } catch (error) {
-            console.error('Error loading schedules:', error);
-        } finally {
-            setLoading(false);
         }
-    }
+    }, [session, role, loadEmployees, loadMySchedules]);
+
+    useEffect(() => {
+        if (role === 'super_admin' && selectedEmployee) {
+            loadSchedulesForEmployee(selectedEmployee);
+        }
+    }, [selectedEmployee, role, loadSchedulesForEmployee]);
 
     function getWeekDateRange(weekStartDate) {
         const start = new Date(weekStartDate);
