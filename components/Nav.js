@@ -105,6 +105,12 @@ export default function Nav({ show }) {
                    </svg>
                    My Leave
                </Link>
+               <Link href={'/my-schedule'} className={pathname === '/my-schedule' ? activeLink : inactiveLink}>
+                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={pathname === '/my-schedule' ? activeIcon : inactiveIcon}>
+                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                   </svg>
+                   My Schedule
+               </Link>
                {role === 'super_admin' && (
                <Link href={'/leave-approvals'} className={pathname === '/leave-approvals' ? activeLink : inactiveLink}>
                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={pathname === '/leave-approvals' ? activeIcon : inactiveIcon}>
@@ -119,6 +125,14 @@ export default function Nav({ show }) {
                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
                    </svg>
                    Absence Calendar
+               </Link>
+               )}
+               {role === 'super_admin' && (
+               <Link href={'/manage-schedules'} className={pathname === '/manage-schedules' ? activeLink : inactiveLink}>
+                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={pathname === '/manage-schedules' ? activeIcon : inactiveIcon}>
+                       <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5M12 12.75h.008v.008H12v-.008zm0 2.25h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zm-2.25-4.5h.008v.008H9.75v-.008zm0 2.25h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zm-2.25-4.5h.008v.008H7.5v-.008zm0 2.25h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-6.75h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V12zm0 2.25h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm2.25-6.75h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V12zm0 2.25h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z" />
+                   </svg>
+                   Manage Schedules
                </Link>
                )}
                <Link href={'/liturgy'} className={pathname.includes('/liturgy') ? activeLink : inactiveLink}>
