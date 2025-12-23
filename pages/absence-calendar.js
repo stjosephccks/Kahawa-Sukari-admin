@@ -33,12 +33,8 @@ export default function AbsenceCalendarPage() {
     });
 
     useEffect(() => {
-        if (role !== 'super_admin') {
-            router.push('/my-leave');
-            return;
-        }
         loadData();
-    }, [currentDate, role]);
+    }, [currentDate]);
 
     async function loadData() {
         try {
@@ -100,6 +96,7 @@ export default function AbsenceCalendarPage() {
     }
 
     function handleCellClick(user, date) {
+        if (role !== 'super_admin') return;
         setSelectedUser(user);
         setSelectedDate(date);
         setFormData({
@@ -125,9 +122,6 @@ export default function AbsenceCalendarPage() {
         }
     }
 
-    if (role !== 'super_admin') {
-        return null;
-    }
 
     return (
         <Layout>

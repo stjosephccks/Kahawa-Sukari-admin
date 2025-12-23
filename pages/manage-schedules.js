@@ -285,15 +285,15 @@ export default function ManageSchedulesPage() {
             </div>
 
             {showForm && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-                    <div className="bg-white rounded-xl shadow-2xl max-w-6xl w-full my-8">
-                        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-4 rounded-t-xl">
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-xl shadow-2xl max-w-6xl w-full max-h-[90vh] flex flex-col">
+                        <div className="bg-blue-600 text-white px-6 py-4 rounded-t-xl flex-shrink-0">
                             <h2 className="text-xl font-bold">
                                 {editingSchedule ? 'Edit Schedule' : 'Create New Schedule'}
                             </h2>
                         </div>
                         
-                        <form onSubmit={handleSubmit} className="p-6">
+                        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6">
                             <div className="grid grid-cols-2 gap-4 mb-6">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -367,33 +367,33 @@ export default function ManageSchedulesPage() {
                                 <p className="text-xs text-gray-500 mb-2">
                                     💡 Tip: Tasks can span multiple time slots. Just enter the same task across multiple rows for longer activities.
                                 </p>
-                                <div className="overflow-x-auto border rounded-lg max-h-[500px] overflow-y-auto">
-                                    <table className="min-w-full divide-y divide-gray-200">
-                                        <thead className="bg-gray-50">
+                                <div className="overflow-x-auto border rounded-lg max-h-[400px] overflow-y-auto">
+                                    <table className="w-full divide-y divide-gray-200">
+                                        <thead className="bg-gray-50 sticky top-0 z-10">
                                             <tr>
-                                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
-                                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Mon</th>
-                                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Tue</th>
-                                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Wed</th>
-                                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Thu</th>
-                                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Fri</th>
-                                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Sat</th>
-                                                <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Sun</th>
+                                                <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase sticky left-0 bg-gray-50">Time</th>
+                                                <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">Mon</th>
+                                                <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">Tue</th>
+                                                <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">Wed</th>
+                                                <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">Thu</th>
+                                                <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">Fri</th>
+                                                <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">Sat</th>
+                                                <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase">Sun</th>
                                             </tr>
                                         </thead>
                                         <tbody className="bg-white divide-y divide-gray-200">
                                             {formData.timeSlots.map((slot, index) => (
                                                 <tr key={index}>
-                                                    <td className="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900 bg-gray-50">
+                                                    <td className="px-2 py-2 whitespace-nowrap text-xs font-medium text-gray-900 bg-gray-50 sticky left-0">
                                                         {slot.time}
                                                     </td>
                                                     {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map(day => (
-                                                        <td key={day} className="px-3 py-2">
+                                                        <td key={day} className="px-1 py-1">
                                                             <textarea
                                                                 value={slot[day]}
                                                                 onChange={(e) => updateTimeSlot(index, day, e.target.value)}
-                                                                className="w-full min-w-[140px] px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none hover:border-gray-400 transition-colors"
-                                                                placeholder="Enter task..."
+                                                                className="w-full min-w-[100px] px-2 py-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 resize-none hover:border-gray-400 transition-colors"
+                                                                placeholder="Task..."
                                                                 rows={2}
                                                             />
                                                         </td>
@@ -417,10 +417,12 @@ export default function ManageSchedulesPage() {
                                     placeholder="List any important tasks for the week..."
                                 />
                             </div>
+                        </form>
 
+                        <div className="border-t bg-gray-50 px-6 py-4 rounded-b-xl flex-shrink-0">
                             <div className="flex gap-3">
                                 <button
-                                    type="submit"
+                                    onClick={handleSubmit}
                                     disabled={saving}
                                     className="flex-1 bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 font-medium disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                                 >
@@ -447,7 +449,7 @@ export default function ManageSchedulesPage() {
                                     Cancel
                                 </button>
                             </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
             )}
