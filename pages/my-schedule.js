@@ -1,21 +1,66 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Layout from "@/components/Layout";
+import useAuth from '@/hooks/useAuth';
 import { useSession } from 'next-auth/react';
 
 export default function MySchedulePage() {
     const [schedules, setSchedules] = useState([]);
     const [selectedSchedule, setSelectedSchedule] = useState(null);
+    const [employees, setEmployees] = useState([]);
+    const [selectedEmployee, setSelectedEmployee] = useState('');
+    const [loading, setLoading] = useState(false);
+    const { role } = useAuth();
     const { data: session } = useSession();
 
     useEffect(() => {
         if (session?.user?.email) {
-            loadMySchedules();
+            if (role === 'super_admin') {
+                loadEmployees();
+            } else {
+                loadMySchedules();
+            }
         }
-    }, [session]);
+    }, [session, role]);
+
+    useEffect(() => {
+        if (role === 'super_admin' && selectedEmployee) {
+            loadSchedulesForEmployee(selectedEmployee);
+        }
+    }, [selectedEmployee]);
+
+    async function loadEmployees() {
+        try {
+            const response = await axios.get('/api/admin', { params: { limit: 100 } });
+            setEmployees(response.data.employees);
+            
+            // Find current user (super_admin) in the employee list
+            const currentUser = response.data.employees.find(emp => emp.email === session?.user?.email);
+            
+            if (currentUser) {
+                // Check if super_admin has their own schedule
+                const scheduleResponse = await axios.get('/api/schedules', {
+                    params: { employeeId: currentUser._id }
+                });
+                
+                // If super_admin has schedules, select themselves by default
+                if (scheduleResponse.data.schedules.length > 0) {
+                    setSelectedEmployee(currentUser._id);
+                } else if (response.data.employees.length > 0) {
+                    // Otherwise, select first employee
+                    setSelectedEmployee(response.data.employees[0]._id);
+                }
+            } else if (response.data.employees.length > 0) {
+                setSelectedEmployee(response.data.employees[0]._id);
+            }
+        } catch (error) {
+            console.error('Error loading employees:', error);
+        }
+    }
 
     async function loadMySchedules() {
         try {
+            setLoading(true);
             const response = await axios.get('/api/schedules');
             setSchedules(response.data.schedules);
             if (response.data.schedules.length > 0) {
@@ -23,6 +68,27 @@ export default function MySchedulePage() {
             }
         } catch (error) {
             console.error('Error loading schedules:', error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    async function loadSchedulesForEmployee(employeeId) {
+        try {
+            setLoading(true);
+            const response = await axios.get('/api/schedules', {
+                params: { employeeId }
+            });
+            setSchedules(response.data.schedules);
+            if (response.data.schedules.length > 0) {
+                setSelectedSchedule(response.data.schedules[0]);
+            } else {
+                setSelectedSchedule(null);
+            }
+        } catch (error) {
+            console.error('Error loading schedules:', error);
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -37,11 +103,39 @@ export default function MySchedulePage() {
         <Layout>
             <div className="p-6">
                 <div className="mb-6">
-                    <h1 className="text-3xl font-bold text-gray-800">My Schedule</h1>
-                    <p className="text-gray-600 mt-1">View your weekly work schedule</p>
+                    <h1 className="text-3xl font-bold text-gray-800">
+                        {role === 'super_admin' ? 'Employee Schedules' : 'My Schedule'}
+                    </h1>
+                    <p className="text-gray-600 mt-1">
+                        {role === 'super_admin' ? 'View employee weekly schedules' : 'View your weekly work schedule'}
+                    </p>
                 </div>
 
-                {schedules.length === 0 ? (
+                {role === 'super_admin' && employees.length > 0 && (
+                    <div className="mb-6 bg-white rounded-lg shadow-md p-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Select Employee
+                        </label>
+                        <select
+                            value={selectedEmployee}
+                            onChange={(e) => setSelectedEmployee(e.target.value)}
+                            className="w-full md:w-96 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                        >
+                            {employees.map(emp => (
+                                <option key={emp._id} value={emp._id}>
+                                    {emp.name} ({emp.email})
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                )}
+
+                {loading ? (
+                    <div className="bg-white rounded-xl shadow-lg p-12 text-center">
+                        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                        <p className="mt-4 text-gray-600">Loading schedules...</p>
+                    </div>
+                ) : schedules.length === 0 ? (
                     <div className="bg-white rounded-xl shadow-lg p-12 text-center">
                         <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
