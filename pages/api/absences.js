@@ -90,7 +90,7 @@ export default async function handle(req, res) {
     if (!isAuthorized) return;
 
     if (method === "POST") {
-      const { user, absenceType, customTypeName, startDate, endDate, reason, requestedBy, notes } = req.body;
+      const { user, absenceType, customTypeName, startDate, endDate, isPartialDay, startTime, endTime, reason, requestedBy, notes } = req.body;
       
       if (!user || !absenceType || !startDate || !endDate) {
         return res.status(400).json({ 
@@ -110,6 +110,17 @@ export default async function handle(req, res) {
         return res.status(400).json({ error: "End date must be after start date" });
       }
 
+      let totalHours = 0;
+      if (isPartialDay && startTime && endTime) {
+        const [startHour, startMin] = startTime.split(':').map(Number);
+        const [endHour, endMin] = endTime.split(':').map(Number);
+        totalHours = (endHour * 60 + endMin - startHour * 60 - startMin) / 60;
+        
+        if (totalHours <= 0) {
+          return res.status(400).json({ error: "End time must be after start time" });
+        }
+      }
+
       const session = await getServerSession(req, res, authOptions);
       const requestingUser = await AdminEmail.findOne({ email: session.user.email });
       const isAdminRequest = requestingUser?.role === 'super_admin';
@@ -123,6 +134,10 @@ export default async function handle(req, res) {
         customTypeName: customTypeName?.trim(),
         startDate: start,
         endDate: end,
+        isPartialDay: isPartialDay || false,
+        startTime: isPartialDay ? startTime : undefined,
+        endTime: isPartialDay ? endTime : undefined,
+        totalHours: isPartialDay ? totalHours : 0,
         reason: reason?.trim(),
         requestedBy: requestingUser._id,
         requestedByRole: isAdminRequest ? 'admin' : 'employee',

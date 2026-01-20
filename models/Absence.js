@@ -40,6 +40,22 @@ const AbsenceSchema = new Schema({
     type: Number,
     default: 0
   },
+  isPartialDay: {
+    type: Boolean,
+    default: false
+  },
+  startTime: {
+    type: String,
+    trim: true
+  },
+  endTime: {
+    type: String,
+    trim: true
+  },
+  totalHours: {
+    type: Number,
+    default: 0
+  },
   reason: {
     type: String,
     trim: true

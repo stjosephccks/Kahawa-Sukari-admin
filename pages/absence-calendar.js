@@ -29,6 +29,9 @@ export default function AbsenceCalendarPage() {
         customTypeName: '',
         startDate: '',
         endDate: '',
+        isPartialDay: false,
+        startTime: '09:00',
+        endTime: '17:00',
         reason: ''
     });
 
@@ -105,6 +108,9 @@ export default function AbsenceCalendarPage() {
             customTypeName: '',
             startDate: format(date, 'yyyy-MM-dd'),
             endDate: format(date, 'yyyy-MM-dd'),
+            isPartialDay: false,
+            startTime: '09:00',
+            endTime: '17:00',
             reason: ''
         });
         setShowForm(true);
@@ -113,7 +119,11 @@ export default function AbsenceCalendarPage() {
     async function handleSubmit(e) {
         e.preventDefault();
         try {
-            await axios.post('/api/absences', formData);
+            await axios.post('/api/absences', {
+                ...formData,
+                startTime: formData.isPartialDay ? formData.startTime : undefined,
+                endTime: formData.isPartialDay ? formData.endTime : undefined
+            });
             setShowForm(false);
             loadData();
         } catch (error) {
@@ -162,6 +172,12 @@ export default function AbsenceCalendarPage() {
                                     <span className="text-xs sm:text-sm text-gray-600">{type.label}</span>
                                 </div>
                             ))}
+                            <div className="flex items-center gap-1.5 ml-2 pl-2 border-l border-blue-300">
+                                <span className="relative w-5 h-5 sm:w-6 sm:h-6 rounded flex items-center justify-center bg-gray-400 text-white text-xs font-bold">
+                                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-yellow-400 rounded-full border border-white"></span>
+                                </span>
+                                <span className="text-xs sm:text-sm text-gray-600">Partial Day (Hours)</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -225,11 +241,17 @@ export default function AbsenceCalendarPage() {
                                                 >
                                                     {absence && typeInfo && (
                                                         <div 
-                                                            className="w-8 h-8 mx-auto rounded flex items-center justify-center text-white text-xs font-bold shadow-sm"
+                                                            className="w-8 h-8 mx-auto rounded flex items-center justify-center text-white text-xs font-bold shadow-sm relative"
                                                             style={{backgroundColor: typeInfo.color}}
-                                                            title={`${typeInfo.label}: ${absence.reason || 'No reason provided'}`}
+                                                            title={absence.isPartialDay 
+                                                                ? `${typeInfo.label} (${absence.totalHours}h: ${absence.startTime}-${absence.endTime}): ${absence.reason || 'No reason provided'}`
+                                                                : `${typeInfo.label}: ${absence.reason || 'No reason provided'}`
+                                                            }
                                                         >
                                                             {typeInfo.shortCode}
+                                                            {absence.isPartialDay && (
+                                                                <span className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full border border-white" title="Partial day"></span>
+                                                            )}
                                                         </div>
                                                     )}
                                                 </td>
@@ -307,33 +329,89 @@ export default function AbsenceCalendarPage() {
                                     </div>
                                 )}
 
+                                <div>
+                                    <label className="flex items-center space-x-2 mb-3">
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.isPartialDay}
+                                            onChange={(e) => setFormData({ ...formData, isPartialDay: e.target.checked, endDate: e.target.checked ? formData.startDate : formData.endDate })}
+                                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                        />
+                                        <span className="text-sm font-medium text-gray-700">Partial Day Leave (Hours)</span>
+                                    </label>
+                                </div>
+
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Start Date *
+                                            {formData.isPartialDay ? 'Date *' : 'Start Date *'}
                                         </label>
                                         <input
                                             type="date"
                                             required
                                             value={formData.startDate}
-                                            onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                                            onChange={(e) => setFormData({ ...formData, startDate: e.target.value, endDate: formData.isPartialDay ? e.target.value : formData.endDate })}
                                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         />
                                     </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            End Date *
-                                        </label>
-                                        <input
-                                            type="date"
-                                            required
-                                            value={formData.endDate}
-                                            onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        />
-                                    </div>
+                                    {!formData.isPartialDay && (
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                End Date *
+                                            </label>
+                                            <input
+                                                type="date"
+                                                required
+                                                value={formData.endDate}
+                                                onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            />
+                                        </div>
+                                    )}
                                 </div>
+
+                                {formData.isPartialDay && (
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Start Time *
+                                            </label>
+                                            <input
+                                                type="time"
+                                                required
+                                                value={formData.startTime}
+                                                onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                End Time *
+                                            </label>
+                                            <input
+                                                type="time"
+                                                required
+                                                value={formData.endTime}
+                                                onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {formData.isPartialDay && formData.startTime && formData.endTime && (
+                                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                        <p className="text-sm text-blue-800">
+                                            <span className="font-semibold">Total Hours:</span> {(() => {
+                                                const [startHour, startMin] = formData.startTime.split(':').map(Number);
+                                                const [endHour, endMin] = formData.endTime.split(':').map(Number);
+                                                const hours = (endHour * 60 + endMin - startHour * 60 - startMin) / 60;
+                                                return hours > 0 ? hours.toFixed(1) : 0;
+                                            })()} hours
+                                        </p>
+                                    </div>
+                                )}
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">

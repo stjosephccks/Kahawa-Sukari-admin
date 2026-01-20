@@ -23,6 +23,9 @@ export default function MyLeavePage() {
         customTypeName: '',
         startDate: '',
         endDate: '',
+        isPartialDay: false,
+        startTime: '09:00',
+        endTime: '17:00',
         reason: ''
     });
 
@@ -70,6 +73,9 @@ export default function MyLeavePage() {
                     customTypeName: formData.customTypeName,
                     startDate: formData.startDate,
                     endDate: formData.endDate,
+                    isPartialDay: formData.isPartialDay,
+                    startTime: formData.isPartialDay ? formData.startTime : undefined,
+                    endTime: formData.isPartialDay ? formData.endTime : undefined,
                     reason: formData.reason
                 });
                 
@@ -79,6 +85,9 @@ export default function MyLeavePage() {
                     customTypeName: '',
                     startDate: '',
                     endDate: '',
+                    isPartialDay: false,
+                    startTime: '09:00',
+                    endTime: '17:00',
                     reason: ''
                 });
                 loadMyAbsences();
@@ -186,7 +195,7 @@ export default function MyLeavePage() {
                                             End Date
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Days
+                                            Duration
                                         </th>
                                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Reason
@@ -217,7 +226,11 @@ export default function MyLeavePage() {
                                                 {new Date(absence.endDate).toLocaleDateString()}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                                                {absence.totalDays}
+                                                {absence.isPartialDay ? (
+                                                    <span className="text-blue-600">{absence.totalHours}h ({absence.startTime} - {absence.endTime})</span>
+                                                ) : (
+                                                    <span>{absence.totalDays} {absence.totalDays === 1 ? 'day' : 'days'}</span>
+                                                )}
                                             </td>
                                             <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
                                                 {absence.reason || '-'}
@@ -291,38 +304,94 @@ export default function MyLeavePage() {
                                     </div>
                                 )}
 
+                                <div>
+                                    <label className="flex items-center space-x-2 mb-3">
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.isPartialDay}
+                                            onChange={(e) => setFormData({ ...formData, isPartialDay: e.target.checked, endDate: e.target.checked ? formData.startDate : formData.endDate })}
+                                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                        />
+                                        <span className="text-sm font-medium text-gray-700">Partial Day Leave (Hours)</span>
+                                    </label>
+                                </div>
+
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Start Date *
+                                            {formData.isPartialDay ? 'Date *' : 'Start Date *'}
                                         </label>
                                         <input
                                             type="date"
                                             required
                                             value={formData.startDate}
-                                            onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                                            onChange={(e) => setFormData({ ...formData, startDate: e.target.value, endDate: formData.isPartialDay ? e.target.value : formData.endDate })}
                                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         />
                                     </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            End Date *
-                                        </label>
-                                        <input
-                                            type="date"
-                                            required
-                                            value={formData.endDate}
-                                            onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        />
-                                    </div>
+                                    {!formData.isPartialDay && (
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                End Date *
+                                            </label>
+                                            <input
+                                                type="date"
+                                                required
+                                                value={formData.endDate}
+                                                onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            />
+                                        </div>
+                                    )}
                                 </div>
 
-                                {formData.startDate && formData.endDate && (
+                                {formData.isPartialDay && (
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Start Time *
+                                            </label>
+                                            <input
+                                                type="time"
+                                                required
+                                                value={formData.startTime}
+                                                onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                End Time *
+                                            </label>
+                                            <input
+                                                type="time"
+                                                required
+                                                value={formData.endTime}
+                                                onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {formData.startDate && formData.endDate && !formData.isPartialDay && (
                                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                                         <p className="text-sm text-blue-800">
                                             <span className="font-semibold">Total Days:</span> {calculateDays(formData.startDate, formData.endDate)}
+                                        </p>
+                                    </div>
+                                )}
+
+                                {formData.isPartialDay && formData.startTime && formData.endTime && (
+                                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                        <p className="text-sm text-blue-800">
+                                            <span className="font-semibold">Total Hours:</span> {(() => {
+                                                const [startHour, startMin] = formData.startTime.split(':').map(Number);
+                                                const [endHour, endMin] = formData.endTime.split(':').map(Number);
+                                                const hours = (endHour * 60 + endMin - startHour * 60 - startMin) / 60;
+                                                return hours > 0 ? hours.toFixed(1) : 0;
+                                            })()} hours
                                         </p>
                                     </div>
                                 )}
