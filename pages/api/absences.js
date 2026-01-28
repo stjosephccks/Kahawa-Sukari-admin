@@ -23,6 +23,62 @@ export default async function handle(req, res) {
       if (req.query?.id) {
         const absence = await Absence.findOne({ _id: req.query.id }).populate('user');
         return res.json(absence || { error: "Absence not found" });
+      } else if (req.query?.statsYear) {
+        const year = parseInt(req.query.statsYear);
+        const startDate = new Date(year, 0, 1);
+        const endDate = new Date(year, 11, 31, 23, 59, 59);
+
+        // Fetch all approved absences for the year
+        const approvedAbsences = await Absence.find({
+          status: 'approved',
+          $or: [
+            { startDate: { $gte: startDate, $lte: endDate } },
+            { endDate: { $gte: startDate, $lte: endDate } },
+            { 
+              startDate: { $lte: startDate }, 
+              endDate: { $gte: endDate } 
+            }
+          ]
+        });
+
+        const monthlyTotals = Array(12).fill(0);
+
+        approvedAbsences.forEach(absence => {
+          const absStart = new Date(absence.startDate);
+          const absEnd = new Date(absence.endDate);
+          
+          // Iterate through each month of the year
+          for (let m = 0; m < 12; m++) {
+            const monthStart = new Date(year, m, 1);
+            const monthEnd = new Date(year, m + 1, 0, 23, 59, 59);
+
+            // Calculate overlap between absence and month
+            const overlapStart = absStart > monthStart ? absStart : monthStart;
+            const overlapEnd = absEnd < monthEnd ? absEnd : monthEnd;
+
+            if (overlapStart <= overlapEnd) {
+              if (absence.isPartialDay) {
+                  // For partial day, we usually count as 0.5 or 1 depending on logic.
+                  // Existing code seems to use totalDays (pre-save hook calculates it).
+                  // If it's the same day, overlapStart/End will be the same date.
+                  // totalDays for same day is 1.
+                  // Many systems count partial day as 0.5 for totals if hours are less than a full day, 
+                  // but for now I will stick to what's in the DB totalDays or daily logic.
+                  // Actually, if it's partial day, maybe we should count hours/8? 
+                  // Let's see how totalDays is calculated in the model.
+                  // AbsenceSchema.pre('save'): diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                  // So even a partial day (same start/end date) has totalDays = 1.
+                  monthlyTotals[m] += 1; 
+              } else {
+                  const diffTime = Math.abs(overlapEnd - overlapStart);
+                  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                  monthlyTotals[m] += diffDays;
+              }
+            }
+          }
+        });
+
+        return res.json({ monthlyTotals });
       } else {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 50;

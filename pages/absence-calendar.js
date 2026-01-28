@@ -12,6 +12,7 @@ export default function AbsenceCalendarPage() {
     const [showForm, setShowForm] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
     const [selectedDate, setSelectedDate] = useState(null);
+    const [monthlyTotals, setMonthlyTotals] = useState(Array(12).fill(0));
     const { role } = useAuth();
     const router = useRouter();
 
@@ -39,6 +40,10 @@ export default function AbsenceCalendarPage() {
         loadData();
     }, [currentDate]);
 
+    useEffect(() => {
+        fetchMonthlyTotals();
+    }, [currentDate.getFullYear()]);
+
     async function loadData() {
         try {
             const month = currentDate.getMonth() + 1;
@@ -65,6 +70,18 @@ export default function AbsenceCalendarPage() {
             setUsers(usersRes.data.employees);
         } catch (error) {
             console.error('Error loading data:', error);
+        }
+    }
+
+    async function fetchMonthlyTotals() {
+        try {
+            const year = currentDate.getFullYear();
+            const res = await axios.get('/api/absences', {
+                params: { statsYear: year }
+            });
+            setMonthlyTotals(res.data.monthlyTotals);
+        } catch (error) {
+            console.error('Error fetching monthly totals:', error);
         }
     }
 
@@ -126,6 +143,7 @@ export default function AbsenceCalendarPage() {
             });
             setShowForm(false);
             loadData();
+            fetchMonthlyTotals();
         } catch (error) {
             console.error('Error saving absence:', error);
             alert(error.response?.data?.error || 'Failed to save absence');
@@ -267,6 +285,43 @@ export default function AbsenceCalendarPage() {
                     </div>
                 </div>
 
+                <div className="mt-6 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                    <div className="bg-gray-50 border-b border-gray-200 px-4 py-3">
+                        <h3 className="text-sm font-bold text-gray-700 flex items-center gap-2">
+                            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                            Annual Absence Summary ({currentDate.getFullYear()})
+                        </h3>
+                    </div>
+                    <div className="p-2 sm:p-4">
+                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-2">
+                            {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((month, idx) => {
+                                const isActive = currentDate.getMonth() === idx;
+                                return (
+                                    <button
+                                        key={month}
+                                        onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), idx, 1))}
+                                        className={`flex flex-col items-center justify-center p-2 rounded-lg border transition-all ${
+                                            isActive 
+                                            ? 'bg-blue-600 border-blue-600 text-white shadow-md scale-105 z-10' 
+                                            : 'bg-white border-gray-200 text-gray-600 hover:border-blue-400 hover:bg-blue-50'
+                                        }`}
+                                    >
+                                        <span className={`text-[10px] uppercase font-bold ${isActive ? 'text-blue-100' : 'text-gray-400'}`}>
+                                            {month}
+                                        </span>
+                                        <span className="text-lg font-black leading-none mt-1">
+                                            {monthlyTotals[idx] || 0}
+                                        </span>
+                                        <span className={`text-[9px] mt-1 font-medium ${isActive ? 'text-blue-100' : 'text-gray-400'}`}>
+                                            days
+                                        </span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+
                 <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <div className="flex items-start gap-2">
                         <svg className="w-5 h-5 text-blue-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
@@ -277,6 +332,7 @@ export default function AbsenceCalendarPage() {
                             <p className="text-sm text-blue-700 mt-1">
                                 Click on any cell to record an absence for that employee on that date. 
                                 Weekend days are highlighted in gray. Hover over absence markers to see details.
+                                Use the monthly summary tabs above to navigate between months and see annual totals.
                             </p>
                         </div>
                     </div>
