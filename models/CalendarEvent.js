@@ -11,7 +11,7 @@ const CalendarEventSchema = new Schema({
     group: { 
         type: String, 
         required: true,
-        enum: ['All','St. JohnPaul II Outstation','PMC','YCA','MYM','Mantle','Charistmatic','Liturgical Group','CL','Carovana','Emanuela Mazzola','St.Joseph Hospital', 'Choir',  'CWA', 'CMA', 'Parish Council', 'Other']
+        enum: ['All','St. JohnPaul II Outstation','PMC','YCA','CJPD','MYM','Mantle','Charistmatic','Liturgical Group','CL','Carovana','Emanuela Mazzola','St.Joseph Hospital', 'Choir',  'CWA', 'CMA', 'Parish Council', 'Other']
     },
     description: String
 }, {

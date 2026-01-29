@@ -15,7 +15,7 @@ export default function CalendarPage() {
     const eventTypes = ['All', 'Parish', 'ADN', 'Deanery', 'Other'];
     const { role } = useAuth();
 
-    const groups = ['All','St. JohnPaul II Outstation', 'PMC', 'YCA', 'MYM', 'Mantle', 'Charistmatic','Liturgical Group', 'CL', 'Carovana', 'Emanuela Mazzola', 'St.Joseph Hospital', 'Choir', 'CWA', 'CMA', 'Parish Council', 'Other'];
+    const groups = ['All','St. JohnPaul II Outstation', 'PMC', 'YCA','CJPD', 'MYM', 'Mantle', 'Charistmatic','Liturgical Group', 'CL', 'Carovana', 'Emanuela Mazzola', 'St.Joseph Hospital', 'Choir', 'CWA', 'CMA', 'Parish Council', 'Other'];
 
     useEffect(() => {
         loadEvents();
