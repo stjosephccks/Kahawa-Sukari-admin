@@ -29,7 +29,7 @@ export default function CalendarEventForm({ event, onClose, onSave }) {
         }
     }, [event]);
 
-    const groups = ['All', 'St. JohnPaul II Outstation', 'PMC', 'YCA', 'MYM', 'Mantle', 'Charistmatic','Liturgical Group','CL', 'Carovana', 'Emanuela Mazzola', 'St.Joseph Hospital', 'Choir', 'CWA', 'CMA', 'Parish Council', 'Other'];
+    const groups = ['All', 'St. JohnPaul II Outstation', 'PMC', 'YCA','CJPD', 'MYM', 'Mantle', 'Charistmatic','Liturgical Group','CL', 'Carovana', 'Emanuela Mazzola', 'St.Joseph Hospital', 'Choir', 'CWA', 'CMA', 'Parish Council', 'Other'];
     const activityTypes = ['Parish', 'ADN', 'Deanery', 'Other']
     function formatDateForInput(date) {
         const d = new Date(date);
