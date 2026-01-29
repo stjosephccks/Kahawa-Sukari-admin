@@ -46,7 +46,9 @@ export default function CalendarEventForm({ event, onClose, onSave }) {
 
         setIsSubmitting(true);
         try {
-            const eventData = { title, date, activityType, venue, group, description };
+            // Convert local date string back to a proper Date object then to ISO string
+            const isoDate = new Date(date).toISOString();
+            const eventData = { title, date: isoDate, activityType, venue, group, description };
 
             if (event?._id) {
                 await axios.put('/api/calendar-events', { _id: event._id, ...eventData });

@@ -70,14 +70,27 @@ export default function CalendarPage() {
         setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
     };
 
-    const handleExportToCSV = () => {
-        if (events.length === 0) {
-            alert('No events to export for this month');
+    const handleExportToCSV = async (exportAll = false) => {
+        let exportData = events;
+        
+        if (exportAll) {
+            try {
+                const response = await axios.get('/api/calendar-events');
+                exportData = response.data;
+            } catch (error) {
+                console.error('Error fetching all events for export:', error);
+                alert('Failed to fetch all events');
+                return;
+            }
+        }
+
+        if (exportData.length === 0) {
+            alert('No events to export');
             return;
         }
 
         const headers = ['Title', 'Date', 'Time', 'Activity Type', 'Venue', 'Group', 'Description'];
-        const rows = events.map(event => {
+        const rows = exportData.map(event => {
             const eventDate = new Date(event.date);
             return [
                 `"${(event.title || '').replace(/"/g, '""')}"`,
@@ -99,7 +112,8 @@ export default function CalendarPage() {
         const link = document.createElement('a');
         const url = URL.createObjectURL(blob);
         link.setAttribute('href', url);
-        link.setAttribute('download', `parish_calendar_${format(currentDate, 'MMM_yyyy')}.csv`);
+        const fileName = exportAll ? 'parish_calendar_all.csv' : `parish_calendar_${format(currentDate, 'MMM_yyyy')}.csv`;
+        link.setAttribute('download', fileName);
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
@@ -140,46 +154,59 @@ export default function CalendarPage() {
                 <div className="mb-6">
                     <div className="flex justify-between items-center mb-4">
                         <h1 className="text-3xl font-bold text-gray-800">Parish Calendar</h1>
-                        <div className="flex  gap-3">
-                            <div>
-                                <label htmlFor="group">Group</label>
-                            <select
-                                id="group"
-                                value={selectedGroup}
-                                onChange={(e) => setSelectedGroup(e.target.value)}
-                                className="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-                            >
-                                {groups.map(group => (
-                                    <option key={group} value={group}>{group}</option>
-                                ))}
-                            </select>
+                        <div className="flex items-end gap-3 flex-wrap">
+                            <div className="flex flex-col gap-1">
+                                <label htmlFor="group" className="text-sm font-semibold text-gray-700">Group</label>
+                                <select
+                                    id="group"
+                                    value={selectedGroup}
+                                    onChange={(e) => setSelectedGroup(e.target.value)}
+                                    className="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                                >
+                                    {groups.map(group => (
+                                        <option key={group} value={group}>{group}</option>
+                                    ))}
+                                </select>
                             </div>
-                            <div>
-                            <label htmlFor="activityType">Activity Type</label>
-                            <select
-                                id="activityType"
-                                value={selectedEventType}
-                                onChange={(e) => setSelectedEventType(e.target.value)}
-                                className="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-                            >
-                                {eventTypes.map(type => (
-                                    <option key={type} value={type}>{type}</option>
-                                ))}
-                            </select>
+                            <div className="flex flex-col gap-1">
+                                <label htmlFor="activityType" className="text-sm font-semibold text-gray-700">Activity Type</label>
+                                <select
+                                    id="activityType"
+                                    value={selectedEventType}
+                                    onChange={(e) => setSelectedEventType(e.target.value)}
+                                    className="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                                >
+                                    {eventTypes.map(type => (
+                                        <option key={type} value={type}>{type}</option>
+                                    ))}
+                                </select>
                             </div>
-                            <button
-                                onClick={handleExportToCSV}
-                                className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 shadow-md transition-colors font-medium flex items-center gap-2"
-                            >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                                Export CSV
-                            </button>
+                            
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => handleExportToCSV(false)}
+                                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 shadow-md transition-colors font-medium flex items-center gap-2 text-sm"
+                                    title="Export current month to CSV"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                                    Export Month
+                                </button>
+                                <button
+                                    onClick={() => handleExportToCSV(true)}
+                                    className="bg-emerald-700 text-white px-4 py-2 rounded-lg hover:bg-emerald-800 shadow-md transition-colors font-medium flex items-center gap-2 text-sm"
+                                    title="Export all historical events to CSV"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                    Export All
+                                </button>
+                            </div>
+
                             <button
                                 onClick={() => {
                                     setSelectedEvent(null);
                                     setShowForm(true);
                                 }}
-                                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 shadow-md transition-colors font-medium"
+                                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 shadow-md transition-colors font-medium ml-auto"
                             >
                                 + Add Event
                             </button>
