@@ -150,6 +150,35 @@ export default function AbsenceCalendarPage() {
         }
     }
 
+    function getUserMonthlyTotal(userId) {
+        const monthStart = startOfMonth(currentDate);
+        const monthEnd = endOfMonth(currentDate);
+        
+        const userAbsences = absences.filter(absence => {
+            const absenceUserId = typeof absence.user === 'object' ? absence.user._id : absence.user;
+            return absenceUserId === userId;
+        });
+
+        let totalDays = 0;
+        userAbsences.forEach(absence => {
+            const absStart = new Date(absence.startDate);
+            const absEnd = new Date(absence.endDate);
+            
+            const overlapStart = absStart > monthStart ? absStart : monthStart;
+            const overlapEnd = absEnd < monthEnd ? absEnd : monthEnd;
+
+            if (overlapStart <= overlapEnd) {
+                if (absence.isPartialDay) {
+                    totalDays += 1; // Or custom partial day logic
+                } else {
+                    const diffTime = Math.abs(overlapEnd - overlapStart);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                    totalDays += diffDays;
+                }
+            }
+        });
+        return totalDays;
+    }
 
     return (
         <Layout>
@@ -230,7 +259,7 @@ export default function AbsenceCalendarPage() {
                                         );
                                     })}
                                     <th className="sticky right-0 z-20 bg-gray-100 border border-gray-300 px-4 py-3 text-center text-sm font-semibold text-gray-700 min-w-[100px]">
-                                        Total days
+                                        {format(currentDate, 'MMM')} Total
                                     </th>
                                 </tr>
                             </thead>
@@ -276,7 +305,7 @@ export default function AbsenceCalendarPage() {
                                             );
                                         })}
                                         <td className="sticky right-0 z-10 border border-gray-300 px-4 py-3 text-center text-lg font-bold text-gray-900 bg-inherit">
-                                            {user.totalAbsenceDays || 0}
+                                            {getUserMonthlyTotal(user._id)}
                                         </td>
                                     </tr>
                                 ))}

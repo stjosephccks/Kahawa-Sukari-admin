@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth, getDay } from 'date-fns';
 import axios from 'axios';
 import Layout from "@/components/Layout";
 import CalendarEventForm from "@/components/CalendarEventForm";
@@ -70,13 +70,50 @@ export default function CalendarPage() {
         setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
     };
 
+    const handleExportToCSV = () => {
+        if (events.length === 0) {
+            alert('No events to export for this month');
+            return;
+        }
+
+        const headers = ['Title', 'Date', 'Time', 'Activity Type', 'Venue', 'Group', 'Description'];
+        const rows = events.map(event => {
+            const eventDate = new Date(event.date);
+            return [
+                `"${(event.title || '').replace(/"/g, '""')}"`,
+                `"${format(eventDate, 'yyyy-MM-dd')}"`,
+                `"${format(eventDate, 'HH:mm')}"`,
+                `"${event.activityType || ''}"`,
+                `"${(event.venue || '').replace(/"/g, '""')}"`,
+                `"${event.group || ''}"`,
+                `"${(event.description || '').replace(/"/g, '""')}"`
+            ];
+        });
+
+        const csvContent = [
+            headers.join(','),
+            ...rows.map(row => row.join(','))
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `parish_calendar_${format(currentDate, 'MMM_yyyy')}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     const handleEventSaved = () => {
         setShowForm(false);
         setSelectedEvent(null);
         loadEvents();
     };
 
-    const handleEdit = (event) => {
+    const handleEdit = (e, event) => {
+        e.stopPropagation();
         setSelectedEvent(event);
         setShowForm(true);
     };
@@ -103,8 +140,11 @@ export default function CalendarPage() {
                 <div className="mb-6">
                     <div className="flex justify-between items-center mb-4">
                         <h1 className="text-3xl font-bold text-gray-800">Parish Calendar</h1>
-                        <div className="flex gap-3">
+                        <div className="flex  gap-3">
+                            <div>
+                                <label htmlFor="group">Group</label>
                             <select
+                                id="group"
                                 value={selectedGroup}
                                 onChange={(e) => setSelectedGroup(e.target.value)}
                                 className="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
@@ -113,7 +153,11 @@ export default function CalendarPage() {
                                     <option key={group} value={group}>{group}</option>
                                 ))}
                             </select>
+                            </div>
+                            <div>
+                            <label htmlFor="activityType">Activity Type</label>
                             <select
+                                id="activityType"
                                 value={selectedEventType}
                                 onChange={(e) => setSelectedEventType(e.target.value)}
                                 className="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
@@ -122,6 +166,14 @@ export default function CalendarPage() {
                                     <option key={type} value={type}>{type}</option>
                                 ))}
                             </select>
+                            </div>
+                            <button
+                                onClick={handleExportToCSV}
+                                className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 shadow-md transition-colors font-medium flex items-center gap-2"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                                Export CSV
+                            </button>
                             <button
                                 onClick={() => {
                                     setSelectedEvent(null);
@@ -183,6 +235,11 @@ export default function CalendarPage() {
                             </div>
                         ))}
 
+                        {/* Add empty cells before the first day of the month */}
+                        {[...Array(getDay(startOfMonth(currentDate)))].map((_, i) => (
+                            <div key={`empty-${i}`} className="bg-gray-50 border border-gray-100 min-h-32"></div>
+                        ))}
+
                         {daysInMonth.map(day => {
                             const dayEvents = events.filter(event =>
                                 isSameDay(new Date(event.date), day)
@@ -205,7 +262,7 @@ export default function CalendarPage() {
                                                 <div
                                                     className="text-xs p-1.5 rounded-md truncate mb-1 shadow-sm hover:shadow-md transition-all cursor-pointer"
                                                     style={getEventStyle(event)}
-                                                    onClick={() => handleEdit(event)}
+                                                    onClick={(e) => handleEdit(e, event)}
                                                 >
                                                     <div className="font-medium">{event.title}</div>
                                                     <div className="text-xs opacity-90 mt-0.5">{event.group}</div>

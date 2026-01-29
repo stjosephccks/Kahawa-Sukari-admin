@@ -11,6 +11,24 @@ export default function CalendarEventForm({ event, onClose, onSave }) {
     const [description, setDescription] = useState(event?.description || '');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    useEffect(() => {
+        if (event) {
+            setTitle(event.title || '');
+            setDate(event.date ? formatDateForInput(new Date(event.date)) : '');
+            setActivityType(event.activityType || '');
+            setVenue(event.venue || '');
+            setGroup(event.group || '');
+            setDescription(event.description || '');
+        } else {
+            setTitle('');
+            setDate('');
+            setActivityType('');
+            setVenue('');
+            setGroup('');
+            setDescription('');
+        }
+    }, [event]);
+
     const groups = ['All', 'St. JohnPaul II Outstation', 'PMC', 'YCA', 'MYM', 'Mantle', 'Charistmatic','Liturgical Group','CL', 'Carovana', 'Emanuela Mazzola', 'St.Joseph Hospital', 'Choir', 'CWA', 'CMA', 'Parish Council', 'Other'];
     const activityTypes = ['Parish', 'ADN', 'Deanery', 'Other']
     function formatDateForInput(date) {
@@ -50,7 +68,7 @@ export default function CalendarEventForm({ event, onClose, onSave }) {
             <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
                 <div className="p-6">
                     <h2 className="text-xl font-semibold mb-4">
-                        {event ? 'Edit Event' : 'Add New Event'}
+                        {event?._id ? 'Edit Event' : 'Add New Event'}
                     </h2>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
