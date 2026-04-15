@@ -99,11 +99,12 @@ export default async function handle(req, res) {
         });
       }
       
-      const hashedPassword = await bcrypt.hash(password, 10);
+      // NOTE: Do NOT hash here — the Admin model's pre-save hook handles hashing.
+      // Hashing here would cause the password to be hashed twice and login would fail.
       const admin = await AdminEmail.create({
         name,
         email,
-        password: hashedPassword,
+        password, // plain password — pre-save hook will hash it
         role: role || ROLES.EDITOR,
         employeeNumber: employeeNumber?.trim(),
         mobileNumber: mobileNumber?.trim(),
