@@ -49,7 +49,7 @@ const ZakaSchema = new Schema({
 });
 
 // Add indexes for better query performance
-ZakaSchema.index({ zakaNumber: 1 });
+ZakaSchema.index({ zakaNumber: 1 }, { unique: true, sparse: true });
 ZakaSchema.index({ fullName: 1 });
 
 // Check if model exists before compiling it
