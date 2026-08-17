@@ -163,7 +163,7 @@ export default function ZakaPaymentsPage() {
       (zaka.mobileNumber && zaka.mobileNumber.includes(search)) ||
       (zaka.mobileNumber2 && zaka.mobileNumber2.includes(search))
     );
-  }).slice(0, 50); // Limit to 50 results for performance
+  }).slice(0, 100); // Increased to 100 results
 
   if (status === 'loading') {
     return <Layout><div className="flex justify-center p-8">Loading...</div></Layout>;
@@ -262,6 +262,9 @@ export default function ZakaPaymentsPage() {
                     />
                     {zakaSearchTerm && filteredZakas.length > 0 && (
                       <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                        <div className="px-3 py-2 bg-gray-50 text-xs text-gray-600 border-b">
+                          {filteredZakas.length} member{filteredZakas.length !== 1 ? 's' : ''} found
+                        </div>
                         {filteredZakas.map(zaka => (
                           <div
                             key={zaka.zakaNumber}

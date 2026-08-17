@@ -84,7 +84,7 @@ export default function SMSPage() {
   const fetchStats = useCallback(async () => {
     try {
       const response = await axios.get('/api/sms?action=stats');
-      setStats(response.data.stats);
+      setStats(response.data.balance);
     } catch (err) {
       console.error('Error fetching stats:', err);
     }
@@ -408,7 +408,7 @@ export default function SMSPage() {
           <div className="bg-white p-4 rounded-lg shadow">
             <h3 className="text-sm font-medium text-gray-500">SMS Balance</h3>
             <p className="text-2xl font-bold text-gray-900">
-              {balance ? balance.balance || 'N/A' : 'Loading...'}
+              {balance ? balance.credit || 'N/A' : 'Loading...'}
             </p>
           </div>
           <div className="bg-white p-4 rounded-lg shadow">
