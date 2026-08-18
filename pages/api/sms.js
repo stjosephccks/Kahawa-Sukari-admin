@@ -56,17 +56,63 @@ export default async function handle(req, res) {
         // Prepare personalized messages if template data is provided
         let normalizedRecipients;
         if (templateData && templateId) {
-          const personalizedMessages = smsService.preparePersonalizedMessages(
-            messageToSend,
-            recipients,
-            templateData
-          );
-          normalizedRecipients = personalizedMessages
-            .filter(rec => rec.mobile && smsService.validatePhoneNumber(rec.mobile))
-            .map(rec => ({
-              mobile: smsService.normalizePhoneNumber(rec.mobile),
-              message: rec.message
-            }));
+          // Fetch payment details for each recipient if it's a payment confirmation template
+          const template = await SMSTemplate.findById(templateId);
+          
+          if (template && template.category === 'payment_confirmation') {
+            // Fetch payment details for each recipient
+            const recipientsWithPayments = await Promise.all(
+              recipients.map(async (recipient) => {
+                try {
+                  const currentMonth = new Date().toLocaleString('default', { month: 'long' });
+                  const currentYear = new Date().getFullYear();
+                  
+                  const payment = await ZakaPayment.findOne({
+                    zakaNumber: recipient.zakaNumber,
+                    month: currentMonth,
+                    year: currentYear
+                  });
+                  
+                  if (payment) {
+                    return {
+                      ...recipient,
+                      amount: payment.amount.toString(),
+                      paymentMonth: payment.month,
+                      paymentYear: payment.year
+                    };
+                  }
+                } catch (err) {
+                  console.error('Error fetching payment for recipient:', recipient.zakaNumber);
+                }
+                return recipient;
+              })
+            );
+            
+            const personalizedMessages = smsService.preparePersonalizedMessages(
+              messageToSend,
+              recipientsWithPayments,
+              templateData
+            );
+            normalizedRecipients = personalizedMessages
+              .filter(rec => rec.mobile && smsService.validatePhoneNumber(rec.mobile))
+              .map(rec => ({
+                mobile: smsService.normalizePhoneNumber(rec.mobile),
+                message: rec.message
+              }));
+          } else {
+            // Use provided template data for other template types
+            const personalizedMessages = smsService.preparePersonalizedMessages(
+              messageToSend,
+              recipients,
+              templateData
+            );
+            normalizedRecipients = personalizedMessages
+              .filter(rec => rec.mobile && smsService.validatePhoneNumber(rec.mobile))
+              .map(rec => ({
+                mobile: smsService.normalizePhoneNumber(rec.mobile),
+                message: rec.message
+              }));
+          }
         } else {
           // Normalize phone numbers without personalization
           normalizedRecipients = recipients
