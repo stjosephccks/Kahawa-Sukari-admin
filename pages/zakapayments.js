@@ -33,6 +33,8 @@ export default function ZakaPaymentsPage() {
   });
 
   const [zakaSearchTerm, setZakaSearchTerm] = useState('');
+  const [zakaSearchResults, setZakaSearchResults] = useState([]);
+  const [searchingZakas, setSearchingZakas] = useState(false);
 
   const months = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -76,6 +78,24 @@ export default function ZakaPaymentsPage() {
     }
   }, []);
 
+  const searchZakas = useCallback(async (searchTerm) => {
+    if (!searchTerm || searchTerm.length < 2) {
+      setZakaSearchResults([]);
+      return;
+    }
+
+    try {
+      setSearchingZakas(true);
+      const response = await axios.get(`/api/zaka?search=${encodeURIComponent(searchTerm)}&limit=100`);
+      setZakaSearchResults(response.data.zakas || []);
+    } catch (err) {
+      console.error('Error searching zakas:', err);
+      setZakaSearchResults([]);
+    } finally {
+      setSearchingZakas(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (status === 'loading') return;
     if (!session) {
@@ -85,6 +105,19 @@ export default function ZakaPaymentsPage() {
     fetchPayments();
     fetchZakas();
   }, [session, status, fetchPayments, fetchZakas, router]);
+
+  // Debounced search effect
+  useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      if (zakaSearchTerm && zakaSearchTerm.length >= 2) {
+        searchZakas(zakaSearchTerm);
+      } else {
+        setZakaSearchResults([]);
+      }
+    }, 300);
+
+    return () => clearTimeout(debounceTimer);
+  }, [zakaSearchTerm, searchZakas]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -154,16 +187,6 @@ export default function ZakaPaymentsPage() {
   const getZakaMember = (zakaNumber) => {
     return zakas.find(z => z.zakaNumber === zakaNumber);
   };
-
-  const filteredZakas = zakas.filter(zaka => {
-    const search = zakaSearchTerm.toLowerCase();
-    return (
-      zaka.zakaNumber.toLowerCase().includes(search) ||
-      zaka.fullName.toLowerCase().includes(search) ||
-      (zaka.mobileNumber && zaka.mobileNumber.includes(search)) ||
-      (zaka.mobileNumber2 && zaka.mobileNumber2.includes(search))
-    );
-  }).slice(0, 100); // Increased to 100 results
 
   if (status === 'loading') {
     return <Layout><div className="flex justify-center p-8">Loading...</div></Layout>;
@@ -260,17 +283,18 @@ export default function ZakaPaymentsPage() {
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
                     />
-                    {zakaSearchTerm && filteredZakas.length > 0 && (
+                    {zakaSearchTerm && zakaSearchResults.length > 0 && (
                       <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
                         <div className="px-3 py-2 bg-gray-50 text-xs text-gray-600 border-b">
-                          {filteredZakas.length} member{filteredZakas.length !== 1 ? 's' : ''} found
+                          {zakaSearchResults.length} member{zakaSearchResults.length !== 1 ? 's' : ''} found
                         </div>
-                        {filteredZakas.map(zaka => (
+                        {zakaSearchResults.map(zaka => (
                           <div
                             key={zaka.zakaNumber}
                             onClick={() => {
                               setFormData({ ...formData, zakaNumber: zaka.zakaNumber });
                               setZakaSearchTerm(`${zaka.zakaNumber} - ${zaka.fullName}`);
+                              setZakaSearchResults([]);
                             }}
                             className="px-3 py-2 hover:bg-gray-100 cursor-pointer border-b last:border-b-0"
                           >
@@ -280,9 +304,14 @@ export default function ZakaPaymentsPage() {
                         ))}
                       </div>
                     )}
-                    {zakaSearchTerm && filteredZakas.length === 0 && (
+                    {zakaSearchTerm && zakaSearchResults.length === 0 && !searchingZakas && (
                       <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg px-3 py-2 text-gray-500">
                         No members found
+                      </div>
+                    )}
+                    {searchingZakas && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg px-3 py-2 text-gray-500">
+                        Searching...
                       </div>
                     )}
                   </div>
