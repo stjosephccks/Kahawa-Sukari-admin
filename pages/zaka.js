@@ -3,6 +3,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import Layout from '@/components/Layout';
 import axios from 'axios';
+import { ROLES } from '@/models/Admin';
 
 export default function ZakaPage() {
   const { data: session, status } = useSession();
@@ -58,6 +59,14 @@ export default function ZakaPage() {
       router.push('/api/auth/signin');
       return;
     }
+    
+    // Check if user has admin role
+    const userRole = session.user?.role;
+    if (userRole !== ROLES.SUPER_ADMIN && userRole !== ROLES.EDITOR) {
+      router.push('/');
+      return;
+    }
+    
     fetchZakas();
   }, [session, status, fetchZakas, router]);
 

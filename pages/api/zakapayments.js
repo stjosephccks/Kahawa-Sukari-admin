@@ -4,6 +4,7 @@ import { ZakaPayment } from "@/models/ZakaPayment";
 import { Zaka } from "@/models/Zaka";
 import { authOptions } from "./auth/[...nextauth]";
 import { mongooseConnect } from "@/lib/mongoose";
+import { ROLES } from "@/models/Admin";
 
 async function hasPermission(req, res) {
   const session = await getServerSession(req, res, authOptions);
@@ -11,6 +12,14 @@ async function hasPermission(req, res) {
     res.status(401).json({ error: "Unauthorized" });
     return false;
   }
+  
+  // Check if user has admin role (super_admin or editor)
+  const userRole = session.user.role;
+  if (userRole !== ROLES.SUPER_ADMIN && userRole !== ROLES.EDITOR) {
+    res.status(403).json({ error: "Forbidden: Admin access required" });
+    return false;
+  }
+  
   return true;
 }
 

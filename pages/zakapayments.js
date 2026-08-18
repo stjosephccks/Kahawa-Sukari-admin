@@ -3,6 +3,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import Layout from '@/components/Layout';
 import axios from 'axios';
+import { ROLES } from '@/models/Admin';
 
 export default function ZakaPaymentsPage() {
   const { data: session, status } = useSession();
@@ -102,6 +103,14 @@ export default function ZakaPaymentsPage() {
       router.push('/api/auth/signin');
       return;
     }
+    
+    // Check if user has admin role
+    const userRole = session.user?.role;
+    if (userRole !== ROLES.SUPER_ADMIN && userRole !== ROLES.EDITOR) {
+      router.push('/');
+      return;
+    }
+    
     fetchPayments();
     fetchZakas();
   }, [session, status, fetchPayments, fetchZakas, router]);
