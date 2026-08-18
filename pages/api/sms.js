@@ -60,18 +60,25 @@ export default async function handle(req, res) {
           const template = await SMSTemplate.findById(templateId);
           
           if (template && template.category === 'payment_confirmation') {
+            // Use templateData month/year if provided, otherwise use current month/year
+            const targetMonth = (templateData?.month && templateData.month.trim() !== '') 
+              ? templateData.month 
+              : new Date().toLocaleString('default', { month: 'long' });
+            const targetYear = templateData?.year || new Date().getFullYear();
+            
+            console.log('Fetching payment details for month:', targetMonth, 'year:', targetYear);
+            
             // Fetch payment details for each recipient
             const recipientsWithPayments = await Promise.all(
               recipients.map(async (recipient) => {
                 try {
-                  const currentMonth = new Date().toLocaleString('default', { month: 'long' });
-                  const currentYear = new Date().getFullYear();
-                  
                   const payment = await ZakaPayment.findOne({
                     zakaNumber: recipient.zakaNumber,
-                    month: currentMonth,
-                    year: currentYear
+                    month: targetMonth,
+                    year: targetYear
                   });
+                  
+                  console.log('Payment found for', recipient.zakaNumber, ':', payment);
                   
                   if (payment) {
                     return {
@@ -80,13 +87,17 @@ export default async function handle(req, res) {
                       month: payment.month,
                       year: payment.year
                     };
+                  } else {
+                    console.log('No payment found for', recipient.zakaNumber, 'in', targetMonth, targetYear);
                   }
                 } catch (err) {
-                  console.error('Error fetching payment for recipient:', recipient.zakaNumber);
+                  console.error('Error fetching payment for recipient:', recipient.zakaNumber, err);
                 }
                 return recipient;
               })
             );
+            
+            console.log('Recipients with payments:', recipientsWithPayments);
             
             // Don't use templateData for payment confirmation - use fetched data
             const personalizedMessages = smsService.preparePersonalizedMessages(
