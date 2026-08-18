@@ -55,7 +55,7 @@ export default async function handle(req, res) {
 
         // Prepare personalized messages if template data is provided
         let normalizedRecipients;
-        if (templateData && templateId) {
+        if (templateId) {
           // Fetch payment details for each recipient if it's a payment confirmation template
           const template = await SMSTemplate.findById(templateId);
           
@@ -77,8 +77,8 @@ export default async function handle(req, res) {
                     return {
                       ...recipient,
                       amount: payment.amount.toString(),
-                      paymentMonth: payment.month,
-                      paymentYear: payment.year
+                      month: payment.month,
+                      year: payment.year
                     };
                   }
                 } catch (err) {
@@ -88,10 +88,11 @@ export default async function handle(req, res) {
               })
             );
             
+            // Don't use templateData for payment confirmation - use fetched data
             const personalizedMessages = smsService.preparePersonalizedMessages(
               messageToSend,
               recipientsWithPayments,
-              templateData
+              {} // Empty templateData since we're using fetched payment data
             );
             normalizedRecipients = personalizedMessages
               .filter(rec => rec.mobile && smsService.validatePhoneNumber(rec.mobile))
@@ -99,7 +100,7 @@ export default async function handle(req, res) {
                 mobile: smsService.normalizePhoneNumber(rec.mobile),
                 message: rec.message
               }));
-          } else {
+          } else if (templateData) {
             // Use provided template data for other template types
             const personalizedMessages = smsService.preparePersonalizedMessages(
               messageToSend,
@@ -111,6 +112,14 @@ export default async function handle(req, res) {
               .map(rec => ({
                 mobile: smsService.normalizePhoneNumber(rec.mobile),
                 message: rec.message
+              }));
+          } else {
+            // No template data, just normalize phone numbers
+            normalizedRecipients = recipients
+              .filter(rec => rec.mobile && smsService.validatePhoneNumber(rec.mobile))
+              .map(rec => ({
+                mobile: smsService.normalizePhoneNumber(rec.mobile),
+                message: messageToSend.trim()
               }));
           }
         } else {
