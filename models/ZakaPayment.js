@@ -18,20 +18,21 @@ const ZakaPaymentSchema = new Schema({
     enum: ['January', 'February', 'March', 'April', 'May', 'June', 
            'July', 'August', 'September', 'October', 'November', 'December']
   },
-  year: { 
-    type: Number, 
+  year: {
+    type: Number,
     required: true,
     min: 2020,
     max: 2100
   },
-  amount: { 
-    type: Number, 
-    required: true,
-    min: 0
+  amount: {
+    type: Number,
+    required: false,
+    min: 0,
+    default: null
   },
-  paymentMethod: { 
-    type: String, 
-    required: true,
+  paymentMethod: {
+    type: String,
+    required: false,
     enum: ['cash', 'mpesa', 'bank'],
     default: 'cash'
   },

@@ -28,8 +28,6 @@ export default function ZakaPaymentsPage() {
     zakaNumber: '',
     month: '',
     year: new Date().getFullYear(),
-    amount: '',
-    paymentMethod: 'cash',
     notes: ''
   });
 
@@ -150,8 +148,6 @@ export default function ZakaPaymentsPage() {
       zakaNumber: payment.zakaNumber,
       month: payment.month,
       year: payment.year,
-      amount: payment.amount,
-      paymentMethod: payment.paymentMethod,
       notes: payment.notes || ''
     });
     const member = getZakaMember(payment.zakaNumber);
@@ -175,8 +171,6 @@ export default function ZakaPaymentsPage() {
       zakaNumber: '',
       month: '',
       year: new Date().getFullYear(),
-      amount: '',
-      paymentMethod: 'cash',
       notes: ''
     });
     setZakaSearchTerm('');
@@ -361,35 +355,6 @@ export default function ZakaPaymentsPage() {
                     ))}
                   </select>
                 </div>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Amount (KES)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={formData.amount}
-                    onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Payment Method
-                  </label>
-                  <select
-                    value={formData.paymentMethod}
-                    onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                    required
-                  >
-                    <option value="cash">Cash</option>
-                    <option value="mpesa">M-Pesa</option>
-                    <option value="bank">Bank Transfer</option>
-                  </select>
-                </div>
                 <div className="mb-6">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Notes (Optional)
@@ -439,12 +404,6 @@ export default function ZakaPaymentsPage() {
                   Year
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Amount
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Method
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Payment Date
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -455,13 +414,13 @@ export default function ZakaPaymentsPage() {
             <tbody className="bg-white divide-y divide-gray-200">
               {loading ? (
                 <tr>
-                  <td colSpan="8" className="px-6 py-4 text-center">
+                  <td colSpan="6" className="px-6 py-4 text-center">
                     Loading...
                   </td>
                 </tr>
               ) : payments.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="px-6 py-4 text-center text-gray-500">
+                  <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
                     No payment records found
                   </td>
                 </tr>
@@ -479,12 +438,6 @@ export default function ZakaPaymentsPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {payment.year}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      KES {payment.amount.toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 capitalize">
-                      {payment.paymentMethod}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {new Date(payment.paymentDate).toLocaleDateString()}

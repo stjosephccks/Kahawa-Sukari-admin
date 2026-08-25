@@ -98,20 +98,20 @@ export default async function handle(req, res) {
     if (!isAuthorized) return;
 
     if (method === "POST") {
-      const { zakaNumber, month, year, amount, paymentMethod, notes } = req.body;
-      
+      const { zakaNumber, month, year, notes } = req.body;
+
       // Validate required fields
-      if (!zakaNumber || !month || !year || !amount) {
-        return res.status(400).json({ 
-          error: "Required fields: zakaNumber, month, year, amount" 
+      if (!zakaNumber || !month || !year) {
+        return res.status(400).json({
+          error: "Required fields: zakaNumber, month, year"
         });
       }
 
       // Find the zaka member
       const zakaMember = await Zaka.findOne({ zakaNumber });
       if (!zakaMember) {
-        return res.status(404).json({ 
-          error: "Zaka member not found with this zakaNumber" 
+        return res.status(404).json({
+          error: "Zaka member not found with this zakaNumber"
         });
       }
 
@@ -122,8 +122,8 @@ export default async function handle(req, res) {
         year
       });
       if (existingPayment) {
-        return res.status(400).json({ 
-          error: "Payment already recorded for this member, month, and year" 
+        return res.status(400).json({
+          error: "Payment already recorded for this member, month, and year"
         });
       }
 
@@ -132,21 +132,19 @@ export default async function handle(req, res) {
         zakaMember: zakaMember._id,
         month,
         year: parseInt(year),
-        amount: parseFloat(amount),
-        paymentMethod: paymentMethod || 'cash',
         notes: notes ? notes.trim() : '',
         recordedBy: req.session?.user?.name || 'Admin'
       });
-      
+
       // Populate the zakaMember before returning
       await paymentDoc.populate('zakaMember');
-      
+
       return res.json(paymentDoc);
     }
 
     if (method === "PUT") {
-      const { _id, zakaNumber, month, year, amount, paymentMethod, notes } = req.body;
-      
+      const { _id, zakaNumber, month, year, notes } = req.body;
+
       if (!_id) {
         return res.status(400).json({ error: "ID is required for update" });
       }
@@ -191,18 +189,16 @@ export default async function handle(req, res) {
       if (zakaNumber) updateData.zakaNumber = zakaNumber.trim();
       if (month) updateData.month = month;
       if (year) updateData.year = parseInt(year);
-      if (amount) updateData.amount = parseFloat(amount);
-      if (paymentMethod) updateData.paymentMethod = paymentMethod;
       if (notes !== undefined) updateData.notes = notes ? notes.trim() : '';
 
       const paymentDoc = await ZakaPayment.findByIdAndUpdate(
-        _id, 
-        updateData, 
+        _id,
+        updateData,
         { new: true, runValidators: true }
       );
-      
+
       await paymentDoc.populate('zakaMember');
-      
+
       return res.json(paymentDoc);
     }
 
