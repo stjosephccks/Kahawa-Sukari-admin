@@ -52,6 +52,7 @@ export default async function handle(req, res) {
         
         const total = await Zaka.countDocuments(query);
         const zakas = await Zaka.find(query)
+          .collation({ locale: 'en', numericOrdering: true })
           .sort({ zakaNumber: 1 })
           .skip((page - 1) * limit)
           .limit(limit);
