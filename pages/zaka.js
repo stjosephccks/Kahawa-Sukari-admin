@@ -14,6 +14,8 @@ export default function ZakaPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingZaka, setEditingZaka] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedZakaForPayment, setSelectedZakaForPayment] = useState(null);
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 25, // Increased from 10 to 25 for better performance with large datasets
@@ -27,6 +29,12 @@ export default function ZakaPage() {
     mobileNumber: '',
     mobileNumber2: '',
     group:''
+  });
+
+  const [paymentFormData, setPaymentFormData] = useState({
+    month: '',
+    year: new Date().getFullYear(),
+    notes: ''
   });
 
   const fetchZakas = useCallback(async () => {
@@ -116,6 +124,40 @@ export default function ZakaPage() {
     setEditingZaka(null);
     setShowForm(false);
   };
+
+  const handleRecordPayment = (zaka) => {
+    setSelectedZakaForPayment(zaka);
+    setPaymentFormData({
+      month: '',
+      year: new Date().getFullYear(),
+      notes: ''
+    });
+    setShowPaymentModal(true);
+  };
+
+  const handlePaymentSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post('/api/zakapayments', {
+        zakaNumber: selectedZakaForPayment.zakaNumber,
+        month: paymentFormData.month,
+        year: paymentFormData.year,
+        notes: paymentFormData.notes
+      });
+      setShowPaymentModal(false);
+      setSelectedZakaForPayment(null);
+      setError('');
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to record payment');
+    }
+  };
+
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
+  const years = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i);
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
@@ -251,6 +293,81 @@ export default function ZakaPage() {
           </div>
         )}
 
+        {/* Payment Recording Modal */}
+        {showPaymentModal && selectedZakaForPayment && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg w-full max-w-md">
+              <h2 className="text-xl font-bold mb-4">Record Payment</h2>
+              <div className="mb-4 p-3 bg-gray-50 rounded">
+                <p className="text-sm text-gray-600">Member: <span className="font-semibold">{selectedZakaForPayment.fullName}</span></p>
+                <p className="text-sm text-gray-600">Zaka Number: <span className="font-semibold">{selectedZakaForPayment.zakaNumber}</span></p>
+              </div>
+              <form onSubmit={handlePaymentSubmit}>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Month
+                  </label>
+                  <select
+                    value={paymentFormData.month}
+                    onChange={(e) => setPaymentFormData({ ...paymentFormData, month: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    required
+                  >
+                    <option value="">Select Month</option>
+                    {months.map(month => (
+                      <option key={month} value={month}>{month}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Year
+                  </label>
+                  <select
+                    value={paymentFormData.year}
+                    onChange={(e) => setPaymentFormData({ ...paymentFormData, year: parseInt(e.target.value) })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    required
+                  >
+                    {years.map(year => (
+                      <option key={year} value={year}>{year}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Notes (Optional)
+                  </label>
+                  <textarea
+                    value={paymentFormData.notes}
+                    onChange={(e) => setPaymentFormData({ ...paymentFormData, notes: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    rows="3"
+                  />
+                </div>
+                <div className="flex justify-end space-x-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowPaymentModal(false);
+                      setSelectedZakaForPayment(null);
+                    }}
+                    className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+                  >
+                    Record Payment
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
         {/* Zaka Table */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <table className="min-w-full divide-y divide-gray-200">
@@ -310,6 +427,12 @@ export default function ZakaPage() {
                     </td>
                     
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <button
+                        onClick={() => handleRecordPayment(zaka)}
+                        className="text-green-600 hover:text-green-900 mr-3"
+                      >
+                        Record Payment
+                      </button>
                       <button
                         onClick={() => handleEdit(zaka)}
                         className="text-blue-600 hover:text-blue-900 mr-3"
