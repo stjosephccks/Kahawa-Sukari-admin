@@ -3,7 +3,7 @@ const { UnmatchedMpesaPayment } = require('@/models/UnmatchedMpesaPayment');
 const { Zaka } = require('@/models/Zaka');
 const { ZakaPayment } = require('@/models/ZakaPayment');
 const { getServerSession } = require('next-auth');
-const { authOptions } = require('../auth/[...nextauth]');
+const { authOptions } = require('./auth/[...nextauth]');
 
 async function hasPermission(req, res) {
   const session = await getServerSession(req, res, authOptions);
