@@ -37,7 +37,7 @@ export default async function handle(req, res) {
       endOfWeek.setDate(endOfWeek.getDate() + 6); // End of week (Saturday)
       endOfWeek.setHours(23, 59, 59, 999);
 
-      // Find all payments made in the week
+      // Find all cash payments made in the week
       const payments = await ZakaPayment.find({
         paymentDate: {
           $gte: startOfWeek,
@@ -49,6 +49,27 @@ export default async function handle(req, res) {
       if (payments.length === 0) {
         return res.json({
           message: "No cash payments found for this week",
+          payments: [],
+          sent: 0,
+          failed: 0
+        });
+      }
+
+      // Remove duplicates - group by zakaNumber (one SMS per member per week)
+      const uniquePayments = [];
+      const seenZakaNumbers = new Set();
+
+      for (const payment of payments) {
+        if (!payment.zakaMember) continue;
+        if (!seenZakaNumbers.has(payment.zakaNumber)) {
+          seenZakaNumbers.add(payment.zakaNumber);
+          uniquePayments.push(payment);
+        }
+      }
+
+      if (uniquePayments.length === 0) {
+        return res.json({
+          message: "No unique cash payments found for this week",
           payments: [],
           sent: 0,
           failed: 0
@@ -74,7 +95,7 @@ export default async function handle(req, res) {
       let failedCount = 0;
       const results = [];
 
-      for (const payment of payments) {
+      for (const payment of uniquePayments) {
         if (!payment.zakaMember) continue;
 
         const zakaMember = payment.zakaMember;
@@ -201,6 +222,17 @@ export default async function handle(req, res) {
         paymentMethod: 'cash'
       }).populate('zakaMember');
 
+      // Remove duplicates for summary
+      const uniquePayments = [];
+      const seenZakaNumbers = new Set();
+      for (const payment of payments) {
+        if (!payment.zakaMember) continue;
+        if (!seenZakaNumbers.has(payment.zakaNumber)) {
+          seenZakaNumbers.add(payment.zakaNumber);
+          uniquePayments.push(payment);
+        }
+      }
+
       const smsSent = await ZakaPayment.countDocuments({
         paymentDate: {
           $gte: startOfWeek,
@@ -225,9 +257,10 @@ export default async function handle(req, res) {
           end: endOfWeek
         },
         totalPayments: payments.length,
+        uniquePayments: uniquePayments.length,
         smsSent,
         smsFailed,
-        smsPending: payments.length - smsSent - smsFailed
+        smsPending: uniquePayments.length - smsSent - smsFailed
       });
     }
 
