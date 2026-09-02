@@ -132,6 +132,30 @@ export default function Nav({ show }) {
                     </svg>
                     Bulk SMS
                 </Link>
+                <Link href={'/smstemplates'} className={pathname === ('/smstemplates') ? activeLink : inactiveLink}>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                    </svg>
+                    SMS Templates
+                </Link>
+                <Link href={'/smslogs'} className={pathname === ('/smslogs') ? activeLink : inactiveLink}>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                    </svg>
+                    SMS Logs
+                </Link>
+                <Link href={'/unmatched-mpesa'} className={pathname === ('/unmatched-mpesa') ? activeLink : inactiveLink}>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Unmatched M-Pesa
+                </Link>
+                <Link href={'/mpesa-settings'} className={pathname === ('/mpesa-settings') ? activeLink : inactiveLink}>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511-.653.318-1.353.569-2.065.769-1.879.463-3.9.292-4.5-.946a4.16 4.16 0 01-.497-1.878c-.095-.879.133-1.779.515-2.612.292-.627.741-1.188 1.33-1.591C6.655 7.543 7.72 7.21 8.812 7.21c.704 0 1.402.03 2.09.09m0 9.18c-.253-.962-.584-1.892-.985-2.783-.247-.55-.06-1.21.463-1.511.653-.318 1.353-.569 2.065-.769 1.879-.463 3.9-.292 4.5.946.424.849.497 1.778.497 1.778.095.879-.133 1.779-.515 2.612-.292.627-.741 1.188-1.33 1.591-.858.546-1.923.879-3.015.879-.704 0-1.402-.03-2.09-.09" />
+                    </svg>
+                    M-Pesa Settings
+                </Link>
                 </>
                 )}
                {role === 'super_admin' && (
