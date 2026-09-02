@@ -2,7 +2,7 @@
 import { getServerSession } from "next-auth";
 import { Zaka } from "@/models/Zaka";
 import { ZakaPayment } from "@/models/ZakaPayment";
-import { SMSTemplate } from "@/models/SMSTemplate";
+import { SmsTemplate } from "@/models/SmsTemplate";
 import { authOptions } from "./auth/[...nextauth]";
 import { mongooseConnect } from "@/lib/mongoose";
 import smsService from "@/lib/smsService";
@@ -41,9 +41,9 @@ export default async function handle(req, res) {
         
         // If template is provided, use template content
         if (templateId) {
-          const template = await SMSTemplate.findById(templateId);
+          const template = await SmsTemplate.findById(templateId);
           if (template) {
-            messageToSend = template.content;
+            messageToSend = template.template;
           }
         }
 
@@ -57,9 +57,9 @@ export default async function handle(req, res) {
         let normalizedRecipients;
         if (templateId) {
           // Fetch payment details for each recipient if it's a payment confirmation template
-          const template = await SMSTemplate.findById(templateId);
+          const template = await SmsTemplate.findById(templateId);
           
-          if (template && template.category === 'payment_confirmation') {
+          if (template && template.type === 'payment_confirmation') {
             // Use templateData month/year if provided, otherwise use current month/year
             const targetMonth = (templateData?.month && templateData.month.trim() !== '') 
               ? templateData.month 
@@ -178,9 +178,9 @@ export default async function handle(req, res) {
         
         // If template is provided, use template content
         if (templateId) {
-          const template = await SMSTemplate.findById(templateId);
+          const template = await SmsTemplate.findById(templateId);
           if (template) {
-            messageToSend = template.content;
+            messageToSend = template.template;
           }
         }
 
@@ -281,9 +281,9 @@ export default async function handle(req, res) {
         
         // If template is provided, use template content
         if (templateId) {
-          const template = await SMSTemplate.findById(templateId);
+          const template = await SmsTemplate.findById(templateId);
           if (template) {
-            messageToSend = template.content;
+            messageToSend = template.template;
           }
         }
 
@@ -378,9 +378,9 @@ export default async function handle(req, res) {
         
         // If template is provided, use template content
         if (templateId) {
-          const template = await SMSTemplate.findById(templateId);
+          const template = await SmsTemplate.findById(templateId);
           if (template) {
-            messageToSend = template.content;
+            messageToSend = template.template;
           }
         }
 

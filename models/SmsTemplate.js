@@ -10,7 +10,7 @@ const SmsTemplateSchema = new Schema({
   type: {
     type: String,
     required: true,
-    enum: ['mpesa_confirmation', 'weekly_reminder', 'payment_reminder', 'custom']
+    enum: ['mpesa_confirmation', 'payment_confirmation', 'payment_reminder', 'weekly_reminder', 'custom']
   },
   template: {
     type: String,

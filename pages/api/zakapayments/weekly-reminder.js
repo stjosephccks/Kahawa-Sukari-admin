@@ -1,10 +1,10 @@
-const { mongooseConnect } = require('@/lib/mongoose');
-const { ZakaPayment } = require('@/models/ZakaPayment');
-const { Zaka } = require('@/models/Zaka');
-const { SmsLog } = require('@/models/SmsLog');
-const { SmsTemplate } = require('@/models/SmsTemplate');
-const { getServerSession } = require('next-auth');
-const { authOptions } = require('../auth/[...nextauth]');
+import { mongooseConnect } from '@/lib/mongoose';
+import { ZakaPayment } from '@/models/ZakaPayment';
+import { Zaka } from '@/models/Zaka';
+import { SmsLog } from '@/models/SmsLog';
+import { SmsTemplate } from '@/models/SmsTemplate';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../auth/[...nextauth]';
 
 async function hasPermission(req, res) {
   const session = await getServerSession(req, res, authOptions);
