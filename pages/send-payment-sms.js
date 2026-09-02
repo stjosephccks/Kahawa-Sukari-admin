@@ -12,7 +12,7 @@ export default function SendPaymentSMS() {
 
     useEffect(() => {
         loadSummary();
-    }, [startDate, endDate]);
+    }, [startDate, endDate]); // eslint-disable-line react-hooks/exhaustive-deps
 
     function loadSummary() {
         const params = {};

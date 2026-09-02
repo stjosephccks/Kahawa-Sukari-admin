@@ -234,7 +234,7 @@ export default function MpesaSettings() {
                         <li>Copy the Consumer Key and Consumer Secret from your app</li>
                         <li>For production, you&apos;ll need to request a passkey from Safaricom</li>
                         <li>Register your paybill numbers with Safaricom for C2B payments</li>
-                        <li><strong>Click "Register C2B URLs" button above to register your callback URLs with Safaricom</strong></li>
+                        <li><strong>Click &quot;Register C2B URLs&quot; button above to register your callback URLs with Safaricom</strong></li>
                     </ol>
                 </div>
             </div>
