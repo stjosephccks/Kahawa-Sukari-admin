@@ -78,8 +78,7 @@ export default function SmsLogs() {
                     >
                         <option value="">All Types</option>
                         <option value="mpesa_confirmation">M-Pesa Confirmation</option>
-                        <option value="weekly_reminder">Weekly Reminder</option>
-                        <option value="payment_reminder">Payment Reminder</option>
+                        <option value="payment_confirmation">Payment Confirmation</option>
                         <option value="custom">Custom</option>
                     </select>
 

@@ -97,8 +97,7 @@ export default function SmsTemplates() {
 
     const availableVariables = {
         mpesa_confirmation: ['fullName', 'zakaNumber', 'month', 'year', 'amount', 'receipt', 'paybill'],
-        weekly_reminder: ['fullName', 'zakaNumber', 'month', 'year', 'amount'],
-        payment_reminder: ['fullName', 'zakaNumber', 'month', 'year'],
+        payment_confirmation: ['fullName', 'zakaNumber', 'month', 'year', 'amount'],
         custom: ['fullName', 'zakaNumber', 'month', 'year', 'amount']
     };
 
@@ -125,8 +124,7 @@ export default function SmsTemplates() {
                     >
                         <option value="">All Types</option>
                         <option value="mpesa_confirmation">M-Pesa Confirmation</option>
-                        <option value="weekly_reminder">Weekly Reminder</option>
-                        <option value="payment_reminder">Payment Reminder</option>
+                        <option value="payment_confirmation">Payment Confirmation</option>
                         <option value="custom">Custom</option>
                     </select>
                 </div>
@@ -158,8 +156,7 @@ export default function SmsTemplates() {
                                             className="w-full px-3 py-2 border border-gray-300 rounded-md"
                                         >
                                             <option value="mpesa_confirmation">M-Pesa Confirmation</option>
-                                            <option value="weekly_reminder">Weekly Reminder</option>
-                                            <option value="payment_reminder">Payment Reminder</option>
+                                            <option value="payment_confirmation">Payment Confirmation</option>
                                             <option value="custom">Custom</option>
                                         </select>
                                     </div>

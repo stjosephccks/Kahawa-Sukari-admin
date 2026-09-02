@@ -27,17 +27,21 @@ export default async function handle(req, res) {
 
       const { startDate, endDate, testOnly = false } = req.body;
 
-      // Calculate week range if not provided
+      // Use provided dates or default to current week
       const now = new Date();
       const startOfWeek = startDate ? new Date(startDate) : new Date(now);
-      startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay()); // Start of week (Sunday)
+      if (!startDate) {
+        startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay()); // Start of week (Sunday)
+      }
       startOfWeek.setHours(0, 0, 0, 0);
 
       const endOfWeek = endDate ? new Date(endDate) : new Date(startOfWeek);
-      endOfWeek.setDate(endOfWeek.getDate() + 6); // End of week (Saturday)
+      if (!endDate) {
+        endOfWeek.setDate(endOfWeek.getDate() + 6); // End of week (Saturday)
+      }
       endOfWeek.setHours(23, 59, 59, 999);
 
-      // Find all cash payments made in the week
+      // Find all cash payments made in the date range
       const payments = await ZakaPayment.find({
         paymentDate: {
           $gte: startOfWeek,
@@ -48,14 +52,14 @@ export default async function handle(req, res) {
 
       if (payments.length === 0) {
         return res.json({
-          message: "No cash payments found for this week",
+          message: "No cash payments found for this date range",
           payments: [],
           sent: 0,
           failed: 0
         });
       }
 
-      // Remove duplicates - group by zakaNumber (one SMS per member per week)
+      // Remove duplicates - group by zakaNumber (one SMS per member)
       const uniquePayments = [];
       const seenZakaNumbers = new Set();
 
@@ -69,22 +73,22 @@ export default async function handle(req, res) {
 
       if (uniquePayments.length === 0) {
         return res.json({
-          message: "No unique cash payments found for this week",
+          message: "No unique cash payments found for this date range",
           payments: [],
           sent: 0,
           failed: 0
         });
       }
 
-      // Get weekly reminder template
+      // Get payment confirmation template
       const template = await SmsTemplate.findOne({
-        type: 'weekly_reminder',
+        type: 'payment_confirmation',
         isActive: true
       });
 
       if (!template) {
         return res.status(400).json({
-          error: "No active weekly reminder template found. Please create one first."
+          error: "No active payment confirmation template found. Please create one first."
         });
       }
 
@@ -119,7 +123,7 @@ export default async function handle(req, res) {
           recipientName: zakaMember.fullName,
           zakaNumber: zakaMember.zakaNumber,
           message: message,
-          templateType: 'weekly_reminder',
+          templateType: 'payment_confirmation',
           status: 'pending',
           paymentId: payment._id
         });
@@ -188,12 +192,13 @@ export default async function handle(req, res) {
       }
 
       return res.json({
-        message: testOnly ? "Test mode - SMS not sent" : "Weekly reminder process completed",
-        weekRange: {
+        message: testOnly ? "Test mode - SMS not sent" : "SMS sent successfully",
+        dateRange: {
           start: startOfWeek,
           end: endOfWeek
         },
         payments: payments.length,
+        uniquePayments: uniquePayments.length,
         sent: sentCount,
         failed: failedCount,
         results
@@ -204,7 +209,7 @@ export default async function handle(req, res) {
       const isAuthorized = await hasPermission(req, res);
       if (!isAuthorized) return;
 
-      // Get weekly payment summary
+      // Get payment summary for current week
       const now = new Date();
       const startOfWeek = new Date(now);
       startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
@@ -252,7 +257,7 @@ export default async function handle(req, res) {
       });
 
       return res.json({
-        weekRange: {
+        dateRange: {
           start: startOfWeek,
           end: endOfWeek
         },
@@ -267,7 +272,7 @@ export default async function handle(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
 
   } catch (error) {
-    console.error("Weekly Reminder API Error:", error);
+    console.error("Send SMS to Payments API Error:", error);
     return res.status(500).json({
       error: "Internal server error",
       details: error.message
