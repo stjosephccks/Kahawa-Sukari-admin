@@ -1,5 +1,6 @@
 const { mongooseConnect } = require('@/lib/mongoose');
 const { SmsLog } = require('@/models/SmsLog');
+const { ZakaPayment } = require('@/models/ZakaPayment');
 const { getServerSession } = require('next-auth');
 const { authOptions } = require('./auth/[...nextauth]');
 
