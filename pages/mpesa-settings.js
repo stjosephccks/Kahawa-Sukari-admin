@@ -1,10 +1,13 @@
 import Layout from "@/components/Layout";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import axios from "axios";
 
 export default function MpesaSettings() {
     const { canPublish } = useAuth();
     const [saved, setSaved] = useState(false);
+    const [registering, setRegistering] = useState(false);
+    const [registrationResult, setRegistrationResult] = useState(null);
 
     const [parishSettings, setParishSettings] = useState({
         consumerKey: '',
@@ -37,6 +40,27 @@ export default function MpesaSettings() {
               'MPESA_OUTSTATION_PAYBILL=' + outstationSettings.paybill);
         setSaved(true);
         setTimeout(() => setSaved(false), 3000);
+    }
+
+    async function handleRegisterUrls() {
+        const baseUrl = window.location.origin;
+        const validationUrl = `${baseUrl}/api/mpesa/validation`;
+        const confirmationUrl = `${baseUrl}/api/mpesa/confirmation`;
+
+        setRegistering(true);
+        setRegistrationResult(null);
+
+        try {
+            const response = await axios.post('/api/mpesa/register', {
+                validationUrl,
+                confirmationUrl
+            });
+            setRegistrationResult(response.data);
+        } catch (error) {
+            setRegistrationResult({ error: error.response?.data?.error || 'Failed to register URLs' });
+        } finally {
+            setRegistering(false);
+        }
     }
 
     return (
@@ -164,7 +188,7 @@ export default function MpesaSettings() {
                     </div>
                 </div>
 
-                <div className="mt-6">
+                <div className="mt-6 flex gap-4">
                     {canPublish && (
                         <button
                             onClick={handleSave}
@@ -173,7 +197,33 @@ export default function MpesaSettings() {
                             {saved ? 'Saved!' : 'Save Settings'}
                         </button>
                     )}
+                    {canPublish && (
+                        <button
+                            onClick={handleRegisterUrls}
+                            disabled={registering}
+                            className="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition disabled:bg-gray-400"
+                        >
+                            {registering ? 'Registering...' : 'Register C2B URLs'}
+                        </button>
+                    )}
                 </div>
+
+                {registrationResult && (
+                    <div className={`mt-6 border rounded-lg p-4 ${registrationResult.error ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'}`}>
+                        <h4 className="font-semibold mb-2">Registration Result</h4>
+                        {registrationResult.error ? (
+                            <p className="text-red-700">{registrationResult.error}</p>
+                        ) : (
+                            <div>
+                                {registrationResult.map && registrationResult.map((result, index) => (
+                                    <div key={index} className={`mb-2 ${result.success ? 'text-green-700' : 'text-red-700'}`}>
+                                        {result.success ? '✓' : '✗'} {result.paybill} ({result.shortcode}): {result.success ? 'Success' : result.error}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 <div className="mt-8 bg-gray-50 border border-gray-200 rounded-lg p-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">How to Get M-Pesa Credentials</h3>
@@ -184,7 +234,7 @@ export default function MpesaSettings() {
                         <li>Copy the Consumer Key and Consumer Secret from your app</li>
                         <li>For production, you&apos;ll need to request a passkey from Safaricom</li>
                         <li>Register your paybill numbers with Safaricom for C2B payments</li>
-                        <li>Register C2B validation and confirmation URLs using the /api/mpesa/register endpoint</li>
+                        <li><strong>Click "Register C2B URLs" button above to register your callback URLs with Safaricom</strong></li>
                     </ol>
                 </div>
             </div>
