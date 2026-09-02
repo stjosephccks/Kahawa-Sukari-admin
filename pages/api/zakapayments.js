@@ -115,18 +115,6 @@ export default async function handle(req, res) {
         });
       }
 
-      // Check if payment already exists for this member, month, and year
-      const existingPayment = await ZakaPayment.findOne({
-        zakaNumber,
-        month,
-        year
-      });
-      if (existingPayment) {
-        return res.status(400).json({
-          error: "Payment already recorded for this member, month, and year"
-        });
-      }
-
       const paymentDoc = await ZakaPayment.create({
         zakaNumber: zakaNumber.trim(),
         zakaMember: zakaMember._id,
@@ -155,34 +143,15 @@ export default async function handle(req, res) {
         return res.status(404).json({ error: "Payment record not found" });
       }
 
-      // If changing zakaNumber, month, or year, check for duplicates
-      if ((zakaNumber && zakaNumber !== existingPayment.zakaNumber) ||
-          (month && month !== existingPayment.month) ||
-          (year && parseInt(year) !== existingPayment.year)) {
-        
-        const duplicateCheck = await ZakaPayment.findOne({
-          zakaNumber: zakaNumber || existingPayment.zakaNumber,
-          month: month || existingPayment.month,
-          year: year ? parseInt(year) : existingPayment.year,
-          _id: { $ne: _id }
-        });
-        
-        if (duplicateCheck) {
-          return res.status(400).json({ 
-            error: "Payment already exists for this member, month, and year" 
+      // If zakaNumber changed, update zakaMember reference
+      if (zakaNumber && zakaNumber !== existingPayment.zakaNumber) {
+        const zakaMember = await Zaka.findOne({ zakaNumber });
+        if (!zakaMember) {
+          return res.status(404).json({
+            error: "Zaka member not found with this zakaNumber"
           });
         }
-
-        // If zakaNumber changed, update zakaMember reference
-        if (zakaNumber && zakaNumber !== existingPayment.zakaNumber) {
-          const zakaMember = await Zaka.findOne({ zakaNumber });
-          if (!zakaMember) {
-            return res.status(404).json({ 
-              error: "Zaka member not found with this zakaNumber" 
-            });
-          }
-          existingPayment.zakaMember = zakaMember._id;
-        }
+        existingPayment.zakaMember = zakaMember._id;
       }
 
       const updateData = {};

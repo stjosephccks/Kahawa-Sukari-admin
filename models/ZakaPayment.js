@@ -36,8 +36,8 @@ const ZakaPaymentSchema = new Schema({
     enum: ['cash', 'mpesa', 'bank'],
     default: 'cash'
   },
-  paymentDate: { 
-    type: Date, 
+  paymentDate: {
+    type: Date,
     default: Date.now
   },
   notes: {
@@ -47,18 +47,32 @@ const ZakaPaymentSchema = new Schema({
   recordedBy: {
     type: String,
     trim: true
+  },
+  // M-Pesa specific fields
+  mpesaReceipt: {
+    type: String,
+    trim: true
+  },
+  mpesaPhoneNumber: {
+    type: String,
+    trim: true
+  },
+  mpesaTransactionDate: {
+    type: Date
+  },
+  mpesaPaybillNumber: {
+    type: String,
+    trim: true
   }
 }, {
   timestamps: true // Adds createdAt and updatedAt fields
 });
 
-// Compound index to prevent duplicate payments for same member, month, and year
-ZakaPaymentSchema.index({ zakaNumber: 1, month: 1, year: 1 }, { unique: true });
-
 // Indexes for better query performance
 ZakaPaymentSchema.index({ zakaNumber: 1 });
 ZakaPaymentSchema.index({ month: 1, year: 1 });
 ZakaPaymentSchema.index({ paymentDate: -1 });
+ZakaPaymentSchema.index({ mpesaReceipt: 1 });
 
 // Check if model exists before compiling it
 let ZakaPayment;
