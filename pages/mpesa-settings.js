@@ -182,7 +182,7 @@ export default function MpesaSettings() {
                         <li>Create an account or log in</li>
                         <li>Create a new app in the dashboard</li>
                         <li>Copy the Consumer Key and Consumer Secret from your app</li>
-                        <li>For production, you'll need to request a passkey from Safaricom</li>
+                        <li>For production, you&apos;ll need to request a passkey from Safaricom</li>
                         <li>Register your paybill numbers with Safaricom for C2B payments</li>
                         <li>Register C2B validation and confirmation URLs using the /api/mpesa/register endpoint</li>
                     </ol>
