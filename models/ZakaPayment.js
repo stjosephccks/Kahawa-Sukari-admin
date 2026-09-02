@@ -63,6 +63,23 @@ const ZakaPaymentSchema = new Schema({
   mpesaPaybillNumber: {
     type: String,
     trim: true
+  },
+  // SMS delivery tracking
+  smsSent: {
+    type: Boolean,
+    default: false
+  },
+  smsSentAt: {
+    type: Date
+  },
+  smsStatus: {
+    type: String,
+    enum: ['pending', 'sent', 'failed', 'delivered'],
+    default: 'pending'
+  },
+  smsError: {
+    type: String,
+    trim: true
   }
 }, {
   timestamps: true // Adds createdAt and updatedAt fields
@@ -73,6 +90,8 @@ ZakaPaymentSchema.index({ zakaNumber: 1 });
 ZakaPaymentSchema.index({ month: 1, year: 1 });
 ZakaPaymentSchema.index({ paymentDate: -1 });
 ZakaPaymentSchema.index({ mpesaReceipt: 1 });
+ZakaPaymentSchema.index({ smsStatus: 1 });
+ZakaPaymentSchema.index({ smsSent: 1 });
 
 // Check if model exists before compiling it
 let ZakaPayment;
