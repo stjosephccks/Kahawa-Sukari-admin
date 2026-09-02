@@ -21,7 +21,7 @@ const SmsLogSchema = new Schema({
   },
   templateType: {
     type: String,
-    enum: ['mpesa_confirmation', 'weekly_reminder', 'payment_reminder', 'custom']
+    enum: ['mpesa_confirmation', 'payment_confirmation', 'payment_reminder', 'weekly_reminder', 'custom']
   },
   status: {
     type: String,
