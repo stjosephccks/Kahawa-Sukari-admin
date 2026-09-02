@@ -5,6 +5,7 @@ import { SmsLog } from '@/models/SmsLog';
 import { SmsTemplate } from '@/models/SmsTemplate';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth]';
+import smsService from '@/lib/smsService';
 
 async function hasPermission(req, res) {
   const session = await getServerSession(req, res, authOptions);
@@ -92,8 +93,6 @@ export default async function handle(req, res) {
         });
       }
 
-      const SMSService = require('@/lib/smsService');
-      const smsService = new SMSService();
 
       let sentCount = 0;
       let failedCount = 0;
@@ -117,9 +116,12 @@ export default async function handle(req, res) {
           message = message.replace(new RegExp(`{${key}}`, 'g'), value);
         }
 
+        // Normalize phone number
+        const normalizedPhone = smsService.normalizePhoneNumber(zakaMember.mobileNumber);
+
         // Log SMS attempt
         const smsLog = await SmsLog.create({
-          recipient: zakaMember.mobileNumber,
+          recipient: normalizedPhone,
           recipientName: zakaMember.fullName,
           zakaNumber: zakaMember.zakaNumber,
           message: message,
@@ -145,7 +147,7 @@ export default async function handle(req, res) {
 
         // Send SMS
         try {
-          const result = await smsService.sendSMS(zakaMember.mobileNumber, message);
+          const result = await smsService.sendSingleSMS(normalizedPhone, message);
 
           // Update SMS log
           smsLog.status = result.success ? 'sent' : 'failed';

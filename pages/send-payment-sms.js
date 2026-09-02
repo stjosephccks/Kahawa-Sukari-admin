@@ -8,7 +8,6 @@ export default function SendPaymentSMS() {
     const [endDate, setEndDate] = useState('');
     const [summary, setSummary] = useState(null);
     const [sending, setSending] = useState(false);
-    const [testMode, setTestMode] = useState(true);
     const { canPublish } = useAuth();
 
     useEffect(() => {
@@ -30,14 +29,14 @@ export default function SendPaymentSMS() {
     }
 
     async function handleSendSMS() {
-        if (!confirm(testMode ? 'Test mode: SMS will not be sent. Continue?' : 'Send SMS to all cash payments in this date range?')) return;
+        if (!confirm('Send SMS to all cash payments in this date range?')) return;
         
         setSending(true);
         try {
             const response = await axios.post('/api/zakapayments/weekly-reminder', {
                 startDate,
                 endDate,
-                testOnly: testMode
+                testOnly: false
             });
             alert(response.data.message);
             loadSummary();
@@ -129,26 +128,13 @@ export default function SendPaymentSMS() {
                         </div>
                     </div>
 
-                    <div className="flex items-center mb-4">
-                        <input
-                            type="checkbox"
-                            id="testMode"
-                            checked={testMode}
-                            onChange={(e) => setTestMode(e.target.checked)}
-                            className="mr-2"
-                        />
-                        <label htmlFor="testMode" className="text-sm text-gray-700">
-                            Test Mode (preview without sending)
-                        </label>
-                    </div>
-
                     {canPublish && (
                         <button
                             onClick={handleSendSMS}
                             disabled={sending}
                             className="px-6 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:bg-gray-400"
                         >
-                            {sending ? 'Sending...' : testMode ? 'Preview SMS' : 'Send SMS'}
+                            {sending ? 'Sending...' : 'Send SMS'}
                         </button>
                     )}
                 </div>
