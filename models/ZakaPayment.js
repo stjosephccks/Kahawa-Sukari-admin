@@ -86,10 +86,9 @@ const ZakaPaymentSchema = new Schema({
 });
 
 // Indexes for better query performance
-ZakaPaymentSchema.index({ zakaNumber: 1 });
-ZakaPaymentSchema.index({ month: 1, year: 1 });
+ZakaPaymentSchema.index({ zakaNumber: 1, month: 1, year: 1 }); // Allow multiple payments per month
 ZakaPaymentSchema.index({ paymentDate: -1 });
-ZakaPaymentSchema.index({ mpesaReceipt: 1 });
+ZakaPaymentSchema.index({ mpesaReceipt: 1 }, { unique: true }); // Unique M-Pesa receipt
 ZakaPaymentSchema.index({ smsStatus: 1 });
 ZakaPaymentSchema.index({ smsSent: 1 });
 
