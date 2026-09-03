@@ -44,14 +44,14 @@ export default function MpesaSettings() {
 
     async function handleRegisterUrls() {
         const baseUrl = window.location.origin;
-        const validationUrl = `${baseUrl}/api/mpesa/validation`;
-        const confirmationUrl = `${baseUrl}/api/mpesa/confirmation`;
+        const validationUrl = `${baseUrl}/api/payments/validation`;
+        const confirmationUrl = `${baseUrl}/api/payments/confirmation`;
 
         setRegistering(true);
         setRegistrationResult(null);
 
         try {
-            const response = await axios.post('/api/mpesa/register', {
+            const response = await axios.post('/api/payments/register', {
                 validationUrl,
                 confirmationUrl
             });
