@@ -42,13 +42,14 @@ export default async function handle(req, res) {
       }
       endOfWeek.setHours(23, 59, 59, 999);
 
-      // Find all cash payments made in the date range
+      // Find all cash payments made in the date range that haven't had SMS sent yet
       const payments = await ZakaPayment.find({
         paymentDate: {
           $gte: startOfWeek,
           $lte: endOfWeek
         },
-        paymentMethod: 'cash'
+        paymentMethod: 'cash',
+        smsSent: { $ne: true } // Only include payments that haven't had SMS sent
       }).populate('zakaMember');
 
       if (payments.length === 0) {
@@ -229,7 +230,17 @@ export default async function handle(req, res) {
         paymentMethod: 'cash'
       }).populate('zakaMember');
 
-      // Remove duplicates for summary
+      // Count payments that haven't had SMS sent yet
+      const paymentsWithoutSMS = await ZakaPayment.find({
+        paymentDate: {
+          $gte: startOfWeek,
+          $lte: endOfWeek
+        },
+        paymentMethod: 'cash',
+        smsSent: { $ne: true }
+      }).populate('zakaMember');
+
+      // Remove duplicates for summary (from all payments)
       const uniquePayments = [];
       const seenZakaNumbers = new Set();
       for (const payment of payments) {
@@ -237,6 +248,17 @@ export default async function handle(req, res) {
         if (!seenZakaNumbers.has(payment.zakaNumber)) {
           seenZakaNumbers.add(payment.zakaNumber);
           uniquePayments.push(payment);
+        }
+      }
+
+      // Remove duplicates for payments without SMS
+      const uniquePaymentsWithoutSMS = [];
+      const seenZakaNumbersWithoutSMS = new Set();
+      for (const payment of paymentsWithoutSMS) {
+        if (!payment.zakaMember) continue;
+        if (!seenZakaNumbersWithoutSMS.has(payment.zakaNumber)) {
+          seenZakaNumbersWithoutSMS.add(payment.zakaNumber);
+          uniquePaymentsWithoutSMS.push(payment);
         }
       }
 
@@ -265,9 +287,10 @@ export default async function handle(req, res) {
         },
         totalPayments: payments.length,
         uniquePayments: uniquePayments.length,
+        uniquePaymentsWithoutSMS: uniquePaymentsWithoutSMS.length,
         smsSent,
         smsFailed,
-        smsPending: uniquePayments.length - smsSent - smsFailed
+        smsPending: uniquePaymentsWithoutSMS.length
       });
     }
 
