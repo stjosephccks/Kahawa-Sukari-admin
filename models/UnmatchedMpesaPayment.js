@@ -63,6 +63,24 @@ const UnmatchedMpesaPaymentSchema = new Schema({
   },
   assignedYear: {
     type: Number
+  },
+  // Parser hints — what the BillRefParser extracted from BillRefNumber
+  // Used to pre-fill the admin manual assignment form
+  parsedZakaNumber: {
+    type: String,
+    trim: true
+  },
+  parsedMonth: {
+    type: String,
+    trim: true
+  },
+  parsedYear: {
+    type: Number
+  },
+  parseConfidence: {
+    type: String,
+    enum: ['high', 'low', 'none'],
+    default: 'none'
   }
 }, {
   timestamps: true

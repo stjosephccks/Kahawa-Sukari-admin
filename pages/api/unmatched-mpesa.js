@@ -1,24 +1,18 @@
-const { mongooseConnect } = require('@/lib/mongoose');
-const { UnmatchedMpesaPayment } = require('@/models/UnmatchedMpesaPayment');
-const { Zaka } = require('@/models/Zaka');
-const { ZakaPayment } = require('@/models/ZakaPayment');
-const { getServerSession } = require('next-auth');
-const { authOptions } = require('./auth/[...nextauth]');
-
-async function hasPermission(req, res) {
-  const session = await getServerSession(req, res, authOptions);
-  if (!session?.user) {
-    res.status(401).json({ error: "Unauthorized" });
-    return false;
-  }
-  return true;
-}
+import { mongooseConnect } from '@/lib/mongoose';
+import { UnmatchedMpesaPayment } from '@/models/UnmatchedMpesaPayment';
+import { Zaka } from '@/models/Zaka';
+import { ZakaPayment } from '@/models/ZakaPayment';
+import { requireAdmin } from '@/lib/auth';
 
 export default async function handle(req, res) {
   const { method } = req;
 
   try {
     await mongooseConnect();
+
+    // All methods require authentication
+    const user = await requireAdmin(req, res);
+    if (!user) return; // requireAdmin already sent the 401/403 response
 
     if (method === "GET") {
       const page = parseInt(req.query.page) || 1;
@@ -48,8 +42,6 @@ export default async function handle(req, res) {
     }
 
     if (method === "POST") {
-      const isAuthorized = await hasPermission(req, res);
-      if (!isAuthorized) return;
 
       const { _id, assignedZakaNumber, assignedMonth, assignedYear } = req.body;
 
@@ -114,8 +106,6 @@ export default async function handle(req, res) {
     }
 
     if (method === "DELETE") {
-      const isAuthorized = await hasPermission(req, res);
-      if (!isAuthorized) return;
 
       const { id } = req.query;
 

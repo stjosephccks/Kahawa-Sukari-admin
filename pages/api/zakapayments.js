@@ -1,27 +1,8 @@
 // pages/api/zakapayments.js
-import { getServerSession } from "next-auth";
 import { ZakaPayment } from "@/models/ZakaPayment";
 import { Zaka } from "@/models/Zaka";
-import { authOptions } from "./auth/[...nextauth]";
 import { mongooseConnect } from "@/lib/mongoose";
-import { ROLES } from "@/models/Admin";
-
-async function hasPermission(req, res) {
-  const session = await getServerSession(req, res, authOptions);
-  if (!session?.user) {
-    res.status(401).json({ error: "Unauthorized" });
-    return false;
-  }
-  
-  // Check if user has admin role (super_admin or editor)
-  const userRole = session.user.role;
-  if (userRole !== ROLES.SUPER_ADMIN && userRole !== ROLES.EDITOR) {
-    res.status(403).json({ error: "Forbidden: Admin access required" });
-    return false;
-  }
-  
-  return true;
-}
+import { requireAdmin } from "@/lib/auth";
 
 export default async function handle(req, res) {
   const { method } = req;
@@ -93,9 +74,10 @@ export default async function handle(req, res) {
       }
     }
 
-    // Check permissions for write operations
-    const isAuthorized = await hasPermission(req, res);
-    if (!isAuthorized) return;
+    // All write operations require authentication
+    const user = await requireAdmin(req, res);
+    if (!user) return; // requireAdmin already sent the 401/403 response
+
 
     if (method === "POST") {
       const { zakaNumber, month, year, notes } = req.body;

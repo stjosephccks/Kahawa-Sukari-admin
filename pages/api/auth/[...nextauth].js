@@ -23,6 +23,7 @@ export const authOptions = {
     strategy: "jwt",
   },
   secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === 'development',
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_ID,
@@ -84,12 +85,33 @@ export const authOptions = {
         token.sub = user.id; // Set the user id in the token
         token.email = user.email;
         token.name = user.name;
-        token.role = user.role;
+        // If role is already on the user object (Credentials login), use it.
+        // Otherwise (Google login), look it up from the database.
+        if (user.role) {
+          token.role = user.role;
+        } else {
+          try {
+            const client = await clientPromise;
+            const db = client.db();
+            const adminRecord = await db.collection("adminemails").findOne({ email: user.email });
+            token.role = adminRecord?.role || null;
+          } catch (err) {
+            console.error("JWT callback: failed to fetch role", err);
+            token.role = null;
+          }
+        }
       }
       return token;
     },
   },
 };
+
+// Log secret availability for debugging
+if (process.env.NODE_ENV === 'production') {
+  console.log('AUTH_SECRET set:', !!process.env.AUTH_SECRET);
+  console.log('NEXTAUTH_SECRET set:', !!process.env.NEXTAUTH_SECRET);
+  console.log('Using secret:', process.env.AUTH_SECRET ? 'AUTH_SECRET' : process.env.NEXTAUTH_SECRET ? 'NEXTAUTH_SECRET' : 'NONE - THIS WILL FAIL');
+}
 
 export default NextAuth(authOptions);
 
