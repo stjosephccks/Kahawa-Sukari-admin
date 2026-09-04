@@ -1,4 +1,5 @@
 const mpesaService = require('../../../lib/mpesaService');
+const { mongooseConnect } = require('../../../lib/mongoose');
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -6,6 +7,7 @@ export default async function handler(req, res) {
   }
 
   try {
+    await mongooseConnect();
     const validationResponse = mpesaService.validateC2BPayment(req.body);
     return res.json(validationResponse);
   } catch (error) {
