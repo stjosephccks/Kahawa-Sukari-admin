@@ -92,8 +92,17 @@ export default async function handle(req, res) {
 
       // Send SMS confirmation
       try {
-        const mpesaService = require('@/lib/mpesaService');
-        await mpesaService.sendPaymentConfirmation(zakaMember, payment, assignedMonth, parseInt(assignedYear));
+        // Use relative path — @/ alias does not work with CommonJS require()
+        const mpesaService = require('../../lib/mpesaService');
+        // Pass msisdn as the mpesaPhone so it uses the number that actually transacted
+        await mpesaService.sendPaymentConfirmation(
+          zakaMember,
+          payment,
+          assignedMonth,
+          parseInt(assignedYear),
+          unmatchedPayment.msisdn  // the M-Pesa sender's phone
+        );
+        console.log(`[SMS] Sent confirmation for manually processed payment: zakaNumber=${zakaMember.zakaNumber}`);
       } catch (smsError) {
         console.error('Error sending SMS for manually processed payment:', smsError);
       }
@@ -105,8 +114,50 @@ export default async function handle(req, res) {
       });
     }
 
-    if (method === "DELETE") {
+    if (method === "PUT") {
+      // Resend SMS for an already-processed unmatched payment
+      const { id } = req.query;
+      if (!id) {
+        return res.status(400).json({ error: "ID is required" });
+      }
 
+      const unmatchedPayment = await UnmatchedMpesaPayment.findById(id);
+      if (!unmatchedPayment) {
+        return res.status(404).json({ error: "Unmatched payment not found" });
+      }
+      if (!unmatchedPayment.manuallyProcessed || !unmatchedPayment.assignedZakaNumber) {
+        return res.status(400).json({ error: "Payment has not been processed yet — assign it first" });
+      }
+
+      const zakaMember = await Zaka.findOne({ zakaNumber: unmatchedPayment.assignedZakaNumber });
+      if (!zakaMember) {
+        return res.status(404).json({ error: "Zaka member not found" });
+      }
+
+      // Look up the ZakaPayment that was created during manual processing
+      const zakaPayment = await ZakaPayment.findOne({
+        mpesaReceipt: unmatchedPayment.transID
+      });
+      if (!zakaPayment) {
+        return res.status(404).json({ error: "ZakaPayment record not found for this transaction" });
+      }
+
+      try {
+        const mpesaService = require('../../lib/mpesaService');
+        await mpesaService.sendPaymentConfirmation(
+          zakaMember,
+          zakaPayment,
+          unmatchedPayment.assignedMonth,
+          unmatchedPayment.assignedYear,
+          unmatchedPayment.msisdn
+        );
+        return res.json({ message: "SMS sent successfully" });
+      } catch (smsError) {
+        console.error('Error resending SMS:', smsError);
+        return res.status(500).json({ error: "Failed to send SMS", details: smsError.message });
+      }
+    }
+    if (method === "DELETE") {
       const { id } = req.query;
 
       if (!id) {
